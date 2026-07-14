@@ -888,7 +888,7 @@ function loadTool(toolId) {
 
   // Online links
   const linksHtml = `<div class="online-title">// ONLINE TOOLLAR</div>` +
-    tool.onlineLinks.map(l => `<a href="${l.url}" target="_blank" class="online-link"><span class="link-icon">ЁЯФЧ</span>${l.name}</a>`).join('');
+    tool.onlineLinks.map(l => `<a href="${l.url}" target="_blank" class="online-link"><span class="link-icon">&#128279;</span>${l.name}</a>`).join('');
   document.getElementById('onlineLinks').innerHTML = linksHtml;
 
   // Hide output
@@ -905,7 +905,7 @@ function copyCmd(btn, text) {
     document.execCommand('copy');
     document.body.removeChild(ta);
   });
-  btn.textContent = 'тЬЕ COPIED!';
+  btn.textContent = '&#10003; COPIED!';
   btn.classList.add('copied');
   setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
 }
