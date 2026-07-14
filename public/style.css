@@ -368,6 +368,7 @@ input:checked + .slider:before { transform: translateX(20px); background: var(--
   border-radius: var(--radius); display: flex; flex-direction: column;
   gap: 4px; text-align: left; transition: all 0.2s;
   position: relative; overflow: hidden;
+  text-decoration: none; cursor: pointer;
 }
 .suggestion-card::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
