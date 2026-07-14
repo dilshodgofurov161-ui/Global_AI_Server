@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
@@ -694,9 +694,9 @@ const TOOLS = {
 <div class="cmd-group">
   <div class="cmd-group-title">тЪб XSS WAF Bypass</div>
   <div class="cmd-block">
-    <div class="cmd-header"><span class="cmd-label">FILTER BYPASS PAYLOADS</span><button class="copy-btn" onclick="copyCmd(this, '<svg/onload=alert(1)>\n<details/open/ontoggle=alert(1)>\n<input onfocus=alert(1) autofocus>\n<script>eval(atob(\\'YWxlcnQoMSk=\\'))</script>\n<ScRiPt>alert(1)</ScRiPt>')">COPY</button></div>
-    <div class="cmd-code"><span class="string"><svg/onload=alert(1)></span>
-<span class="string"><details/open/ontoggle=alert(1)></span>
+    <div class="cmd-header"><span class="cmd-label">FILTER BYPASS PAYLOADS</span><button class="copy-btn" onclick="copyCmd(this, '&lt;svg/onload=alert(1)&gt;\n&lt;details/open/ontoggle=alert(1)&gt;\n<input onfocus=alert(1) autofocus>\n<script>eval(atob(\\'YWxlcnQoMSk=\\'))</script>\n<ScRiPt>alert(1)</ScRiPt>')">COPY</button></div>
+    <div class="cmd-code"><span class="string">&lt;svg/onload=alert(1)&gt;</span>
+<span class="string">&lt;details/open/ontoggle=alert(1)&gt;</span>
 <span class="string"><input onfocus=alert(1) autofocus></span>
 <span class="string"><script>eval(atob('YWxlcnQoMSk='))</script></span></div>
   </div>
@@ -731,10 +731,10 @@ const TOOLS = {
 <div class="cmd-group">
   <div class="cmd-group-title">ЁЯзк Asosiy Test</div>
   <div class="cmd-block">
-    <div class="cmd-header"><span class="cmd-label">BASIC PAYLOADS</span><button class="copy-btn" onclick="copyCmd(this, '<script>alert(1)</script>\n<img src=x onerror=alert(1)>\n<svg onload=alert(1)>\n\"><script>alert(1)</script>')">COPY</button></div>
+    <div class="cmd-header"><span class="cmd-label">BASIC PAYLOADS</span><button class="copy-btn" onclick="copyCmd(this, '<script>alert(1)</script>\n&lt;img src=x onerror=alert(1)&gt;\n&lt;svg onload=alert(1)&gt;\n\"><script>alert(1)</script>')">COPY</button></div>
     <div class="cmd-code"><span class="string"><script>alert(1)</script></span>
-<span class="string"><img src=x onerror=alert(1)></span>
-<span class="string"><svg onload=alert(1)></span>
+<span class="string">&lt;img src=x onerror=alert(1)&gt;</span>
+<span class="string">&lt;svg onload=alert(1)&gt;</span>
 <span class="string">"><script>alert(1)</script></span></div>
   </div>
 </div>
@@ -880,6 +880,11 @@ function loadTool(toolId) {
   document.getElementById('headerToolName').textContent = '// ' + tool.name;
   document.getElementById('terminalTitle').textContent = tool.title;
   document.getElementById('terminalContent').innerHTML = tool.content;
+  // Sanitize: remove any executing event handlers from code display (safety net)
+  document.querySelectorAll('#terminalContent img, #terminalContent svg, #terminalContent details').forEach(function(el) {
+    ['onerror','onload','ontoggle','onclick','onmouseover'].forEach(function(ev){ el.removeAttribute(ev); });
+    if (el.tagName === 'IMG') el.removeAttribute('src');
+  });
 
   // Online links
   const linksHtml = `<div class="online-title">// ONLINE TOOLLAR</div>` +
@@ -931,3 +936,4 @@ loadTool(urlTool);
 </script>
 </body>
 </html>
+
