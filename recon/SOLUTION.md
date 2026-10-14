@@ -104,3 +104,11 @@ decoded cookie value: HTB{pur3ey_cl13n7_51d3}
 ANSWER: HTB{pur3ey_cl13n7_51d3}
 
 # CORRECTION: value = HTB{pur3ly_cl13n7_51d3} ("purely client side")
+
+---
+# XSS Attacks - XSS Discovery exercise (target 154.57.164.65:37488)
+Registration form (GET): fullname, username, password, email
+Reflection confirmed in the EMAIL parameter:
+  curl "http://154.57.164.65:37488/?fullname=x&username=x&password=x&email=<script>alert(1)</script>" -> reflected unescaped
+Q1 vulnerable parameter: email
+Q2 type of XSS: Reflected
