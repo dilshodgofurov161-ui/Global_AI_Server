@@ -1,6 +1,33 @@
 # CTF yechimlari (targetlar)
 
+## Target 5 — Subdomain bruteforcing (HTB Academy "Information Gathering - Web Edition")
+
+| Savol | Javob |
+|-------|-------|
+| inlanefreight.com uchun yetishmayotgan subdomain | `my.inlanefreight.com` |
+
+Ma'lum subdomainlar: `www`, `ns1`, `ns2`, `ns3`, `blog`, `support`, `customer`.
+SecLists'dagi `Discovery/DNS/subdomains-top1million-5000.txt` bilan A yozuvlarini
+bruteforce qilganda faqat bitta yangi nom topiladi:
+
+```
+FOUND blog.inlanefreight.com
+FOUND customer.inlanefreight.com
+FOUND my.inlanefreight.com      <-- yetishmayotgani
+FOUND ns1.inlanefreight.com
+FOUND ns2.inlanefreight.com
+FOUND ns3.inlanefreight.com
+FOUND support.inlanefreight.com
+FOUND www.inlanefreight.com
+```
+
+Tekshirish: `python3 solutions/brute_subdomains.py inlanefreight.com`
+(UDP/53 orqali 50 ta thread; wordlist kerak bo'lsa SecLists'dan yuklab oladi).
+
+---
+
 ## Target 4 — DNS (HTB Academy "Information Gathering - Web Edition", Digging DNS)
+
 
 | Savol | Javob |
 |-------|-------|
