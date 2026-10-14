@@ -14,19 +14,30 @@ Usage: python3 solutions/whois_lookup.py [domain ...]
 import re
 import socket
 import sys
+import time
 
 
-def whois_query(server, query, port=43, timeout=20):
-    """Send a raw WHOIS query over TCP/43 and return the response text."""
-    with socket.create_connection((server, port), timeout=timeout) as sock:
-        sock.sendall((query + "\r\n").encode())
-        chunks = []
-        while True:
-            data = sock.recv(4096)
-            if not data:
-                break
-            chunks.append(data)
-    return b"".join(chunks).decode("utf-8", "replace")
+def whois_query(server, query, port=43, timeout=20, attempts=3):
+    """Send a raw WHOIS query over TCP/43 and return the response text.
+
+    Registrar WHOIS servers (e.g. whois.markmonitor.com) sometimes answer with an
+    empty body when queried too often, so retry a couple of times.
+    """
+    last = ""
+    for attempt in range(attempts):
+        with socket.create_connection((server, port), timeout=timeout) as sock:
+            sock.sendall((query + "\r\n").encode())
+            chunks = []
+            while True:
+                data = sock.recv(4096)
+                if not data:
+                    break
+                chunks.append(data)
+        last = b"".join(chunks).decode("utf-8", "replace")
+        if last.strip():
+            return last
+        time.sleep(3)
+    return last
 
 
 def registry_record(domain):
