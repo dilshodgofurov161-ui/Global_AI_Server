@@ -1,6 +1,46 @@
 # CTF yechimlari (targetlar)
 
+## Target 11 — Skills Assessment (HTB Academy "Information Gathering - Web Edition")
+
+Target: `http://154.57.164.81:36251`, vHost `inlanefreight.htb`. Barchasi jonli tekshirildi.
+
+| # | Savol | Javob |
+|---|-------|-------|
+| 1 | inlanefreight.com registratorining IANA ID | **`468`** (Amazon Registrar, Inc.) |
+| 2 | inlanefreight.htb'ni xizmat qilayotgan HTTP server | **`nginx`** (`Server: nginx/1.26.1`) |
+| 3 | Yashirin admin katalogidagi API kalit | **`e963d863ee0e82ba7080fbf558ca0d3f`** |
+| 4 | Crawling natijasida topilgan email | **`1337testing@inlanefreight.htb`** |
+| 5 | Dasturchilar o'zgartirmoqchi bo'lgan API kalit | **`ba988b835be4aa97d068941dc852ff33`** |
+
+Zanjir:
+1. `whois inlanefreight.com` → `Registrar IANA ID: 468`.
+2. `curl -I -H 'Host: inlanefreight.htb' http://<target>/` → `Server: nginx/1.26.1`.
+3. vhost fuzz (SecLists DNS ro'yxati) → `web1337.inlanefreight.htb`;
+   uning `/robots.txt` fayli:
+   ```
+   Disallow: /admin_h1dd3n
+   ```
+   `http://web1337.inlanefreight.htb/admin_h1dd3n/` →
+   `... the API is still accessible with the key e963d863ee0e82ba7080fbf558ca0d3f`.
+4. `dev.web1337.inlanefreight.htb` sahifalari "Next" zanjiri bilan bog'langan; crawler
+   `index-80.html` da emailni topadi: `1337testing@inlanefreight.htb`.
+5. O'sha zanjirdagi `index-105.html` da HTML izohi:
+   `<!-- Remember to change the API key to ba988b835be4aa97d068941dc852ff33 -->`.
+
+Tekshirish: `python3 solutions/infogath_skills_assessment.py` →
+```
+Q1 registrar IANA ID : 468
+Q2 server software   : nginx
+   hidden admin dir  : /admin_h1dd3n (from robots.txt)
+Q3 admin API key     : e963d863ee0e82ba7080fbf558ca0d3f
+Q4 email             : 1337testing@inlanefreight.htb
+Q5 key to change to  : ba988b835be4aa97d068941dc852ff33
+```
+
+---
+
 ## Target 10 — Web Archives (HTB Academy "Information Gathering - Web Edition")
+
 
 Barchasi **Wayback Machine** (web.archive.org) arxivlaridan jonli tekshirildi.
 
