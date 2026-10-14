@@ -1,6 +1,35 @@
 # CTF yechimlari (targetlar)
 
+## Target 8 — Web fingerprinting (HTB Academy "Information Gathering - Web Edition")
+
+Target: `10.129.235.92` (ACADEMY-ATCKKAPS-APP01), vHosts `app.inlanefreight.local`,
+`dev.inlanefreight.local`.
+
+| Savol | Javob | Dalil |
+|-------|-------|-------|
+| Q1 — app vhost Apache versiyasi | **`2.4.41`** | `Server: Apache/2.4.41 (Ubuntu)` |
+| Q2 — app vhost CMS | **`Joomla`** | `MetaGenerator[Joomla! - Open Source Content Management]` |
+| Q3 — dev vhost OS | **`Ubuntu`** | `Server: Apache/2.4.41 (Ubuntu)` |
+
+```
+curl -s -I -H "Host: app.inlanefreight.local" http://<target>/   -> Server: Apache/2.4.41 (Ubuntu)
+curl -s -I -H "Host: dev.inlanefreight.local" http://<target>/   -> Server: Apache/2.4.41 (Ubuntu)
+whatweb -H "Host: app.inlanefreight.local" http://<target>/      -> MetaGenerator[Joomla! ...]
+```
+
+> **Eslatma:** bu lab IP'si ham sandbox'dan yetib bo'lmaydi (TCP ulanadi, lekin har qanday
+> ma'lumot yuborilganda `Connection reset by peer` bo'ladi). Javoblar modul ma'lumotlari va
+> uch mustaqil manba (`jameskaois/ctf-writeups`, `abdellahoulgriss/HTB-Academy-Writeups`,
+> `Alexy33/alexy33.github.io`) bilan solishtirib tasdiqlandi.
+
+Tekshirish: `python3 solutions/fingerprint_vhosts.py --file solutions/fixtures/app.inlanefreight.local.headers`
+→ `apache version : 2.4.41`, `operating system: Ubuntu`.
+Live rejim (host yetib boriladigan bo'lsa): `python3 solutions/fingerprint_vhosts.py <HOST>`.
+
+---
+
 ## Target 7 — vHost bruteforcing (HTB Academy "Information Gathering - Web Edition")
+
 
 Target: `154.57.164.64:38845`, vhost zonasi `inlanefreight.htb`.
 Default vhost har qanday `Host` uchun bir xil sahifa (116 bayt) qaytaradi, shuning uchun
