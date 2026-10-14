@@ -1,6 +1,36 @@
 # CTF yechimlari (targetlar)
 
+## Target 7 — vHost bruteforcing (HTB Academy "Information Gathering - Web Edition")
+
+Target: `154.57.164.64:38845`, vhost zonasi `inlanefreight.htb`.
+Default vhost har qanday `Host` uchun bir xil sahifa (116 bayt) qaytaradi, shuning uchun
+haqiqiy vhost javob **o'lchami boshqacha** bo'lishi bilan topiladi:
+
+| Savol | Host | Javob | O'lcham |
+|-------|------|-------|---------|
+| Q1 — `web` | `web17611.inlanefreight.htb` | **`web17611.inlanefreight.htb`** | 106 |
+| Q2 — `vm` | `vm5.inlanefreight.htb` | **`vm5.inlanefreight.htb`** | 96 |
+| Q3 — `br` | `browse.inlanefreight.htb` | **`browse.inlanefreight.htb`** | 102 |
+| Q4 — `a` | `admin.inlanefreight.htb` | **`admin.inlanefreight.htb`** | 100 |
+| Q5 — `su` | `support.inlanefreight.htb` | **`support.inlanefreight.htb`** | 104 |
+
+Tekshiruv (o'z targetimizda, `curl -H 'Host: ...'`):
+```
+web17611 -> 200 106  (title "web17611")     web17610 -> 200 116 (default)
+vm5      -> 200  96                          web17612 -> 200 116 (default)
+browse   -> 200 102                          web1     -> 200 116 (default)
+admin    -> 200 100
+support  -> 200 104
+```
+Ya'ni `web17611` yagona mos `web*` nomi (qo'shnilari default sahifani qaytaradi).
+
+Tekshirish skripti: `python3 solutions/vhost_bruteforce.py --numbers web:0-20000 vm:0-60`
+yoki `python3 solutions/vhost_bruteforce.py <wordlist>`.
+
+---
+
 ## Target 6 — DNS zone transfer (HTB Academy "Information Gathering - Web Edition")
+
 
 Target: `10.129.235.84` (ACADEMY-INFOGATH-WEB-DNS) — AXFR `inlanefreight.htb`.
 
