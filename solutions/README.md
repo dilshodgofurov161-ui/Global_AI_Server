@@ -1,6 +1,25 @@
 # CTF yechimlari (targetlar)
 
+## Target 4 — DNS (HTB Academy "Information Gathering - Web Edition", Digging DNS)
+
+| Savol | Javob |
+|-------|-------|
+| Q1 — inlanefreight.com ga qaysi IP map bo'ladi? | `134.209.24.248` |
+| Q2 — 134.209.24.248 uchun PTR yozuvi | `inlanefreight.com` |
+| Q3 — facebook.com mail (MX) yozuvi | `smtpin.vvv.facebook.com` |
+
+```
+dig inlanefreight.com                 -> inlanefreight.com. 300 IN A 134.209.24.248
+nslookup 134.209.24.248               -> 248.24.209.134.in-addr.arpa name = inlanefreight.com.
+dig facebook.com MX                   -> facebook.com. 3600 IN MX 10 smtpin.vvv.facebook.com.
+```
+
+Tekshirish: `python3 solutions/dns_lookup.py` (DoH / dns.google orqali A, PTR, MX).
+
+---
+
 ## Target 3 — WHOIS (HTB Academy "Information Gathering - Web Edition")
+
 
 | Savol | Javob |
 |-------|-------|
