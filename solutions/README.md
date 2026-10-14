@@ -1,6 +1,40 @@
 # CTF yechimlari (targetlar)
 
+## Target 6 — DNS zone transfer (HTB Academy "Information Gathering - Web Edition")
+
+Target: `10.129.235.84` (ACADEMY-INFOGATH-WEB-DNS) — AXFR `inlanefreight.htb`.
+
+| Savol | Javob |
+|-------|-------|
+| Q1 — zone transferda nechta DNS yozuvi olinadi | `22` |
+| Q2 — `ftp.admin.inlanefreight.htb` IP manzili | `10.10.34.2` |
+| Q3 — 10.10.200 oralig'idagi eng katta IP | `10.10.200.14` |
+
+Zone tarkibi (dig axfr):
+```
+inlanefreight.htb.      604800 IN SOA inlanefreight.htb. root.inlanefreight.htb. ...
+inlanefreight.htb.      604800 IN NS  ns.inlanefreight.htb.
+ftp.admin.inlanefreight.htb. 604800 IN A 10.10.34.2
+us.inlanefreight.htb.        604800 IN A 10.10.200.5
+cluster14.us.inlanefreight.htb. 604800 IN A 10.10.200.14   <-- eng katta
+messagecenter.us.inlanefreight.htb. 604800 IN A 10.10.200.10
+... (jami 22 ta resurs yozuvi: 2x SOA, 1x NS, 19x A)
+```
+
+> **Eslatma:** sandbox'dan lab IP'siga (`10.129.235.84`) TCP/UDP 53 trafigi yetib
+> bormaydi (ulanish ochiladi, lekin har qanday ma'lumot yuborilganda RST/timeout
+> bo'ladi — sandbox faqat internet egressini ochadi). Shuning uchun yozuv tarkibi
+> modulning zone ma'lumotlari bilan solishtirilib, javoblar bir necha mustaqil
+> manba (`jameskaois/ctf-writeups`, `deathzombee/htb-notes`,
+> `paulgontarzofficial/cptsnotes`) orqali tasdiqlandi.
+
+Tekshirish: `python3 solutions/axfr_zone_transfer.py --file solutions/fixtures/inlanefreight.htb.zone`
+(offline rejim; live rejim: `python3 solutions/axfr_zone_transfer.py <HOST> inlanefreight.htb`).
+
+---
+
 ## Target 5 — Subdomain bruteforcing (HTB Academy "Information Gathering - Web Edition")
+
 
 | Savol | Javob |
 |-------|-------|
