@@ -49,3 +49,8 @@ vhost hidden.fuzzing_fun.htb -> /godeep/stoneedge/bbclone/typo3/index.php
   curl -H "Host: hidden.fuzzing_fun.htb" http://154.57.164.75:43303/godeep/stoneedge/bbclone/typo3/index.php
   -> HTB{w3b_fuzz1ng_sk1lls}
 ANSWER: HTB{w3b_fuzz1ng_sk1lls}
+
+---
+# JavaScript Deobfuscation (target 154.57.164.78:38110)
+curl http://154.57.164.78:38110/ -> HTML source comment: <!-- HTB{4lw4y5_r34d_7h3_50urc3} -->
+ANSWER: HTB{4lw4y5_r34d_7h3_50urc3}
