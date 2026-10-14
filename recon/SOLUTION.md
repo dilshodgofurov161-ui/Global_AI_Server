@@ -20,3 +20,17 @@ Verify:
 ## GET parameter fuzzing (related)
   curl "http://154.57.164.79:34341/get.php?x=OA_HTML"
   ANSWER (GET): HTB{g3t_fuzz1ng_succ3ss}
+
+---
+# Question 1 (target 154.57.164.74:32459)
+
+Fuzz with DirBuster-2007_directory-list-2.3-medium.txt to find hidden dir,
+then read the tar.gz inside and answer with the Content-Length header.
+
+Hidden dir: /ur-hiddenmember/
+File:       /ur-hiddenmember/backup.tar.gz
+
+  curl -I http://154.57.164.74:32459/ur-hiddenmember/backup.tar.gz
+  # Content-Length: 210
+
+### ANSWER: Content-Length: 210
