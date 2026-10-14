@@ -90,3 +90,8 @@ Q5 (decode hex -> API_p3n_73571n6_15_fun; POST key=...): HTB{r34dy_70_h4ck_my_w4
 GET / -> Set-Cookie: cookie=HTB{570r3d_f0r_3v3ry0n3_70_533}
 (XSS payload alert(document.cookie) would show this cookie value)
 ANSWER: HTB{570r3d_f0r_3v3ry0n3_70_533}
+
+---
+# XSS module (target 154.57.164.81:44289)
+GET / -> Set-Cookie: cookie=HTB{r3fl3c73d_b4ck_2_m3}
+ANSWER: HTB{r3fl3c73d_b4ck_2_m3}
