@@ -1,6 +1,38 @@
 # CTF yechimlari (targetlar)
 
+## Target 10 — Web Archives (HTB Academy "Information Gathering - Web Edition")
+
+Barchasi **Wayback Machine** (web.archive.org) arxivlaridan jonli tekshirildi.
+
+| # | Savol | Javob | Arxiv dalili |
+|---|-------|-------|--------------|
+| 1 | HTB pen testing labs, 08-Aug-2018 | **`74`** | "HTB Network Lab currently has 74 vulnerable machines." |
+| 2 | HTB a'zolar soni, 10-Jun-2017 | **`3054`** | sahifada "3054 members" |
+| 3 | facebook.com qayerga redirect (Mar-2002) | **`http://site.aboutface.com/`** | `<meta HTTP-EQUIV="REFRESH" CONTENT="0; URL=http://site.aboutface.com">` |
+| 4 | paypal.com, Oct-1999 — "beam money to anyone" | **`Palm 0rganizer`** | "PayPal™ lets you beam money to anyone with a Palm™ 0rganizer." |
+| 5 | google.com prototype hosti, Nov-1998 | **`http://google.stanford.edu/`** | arxivlangan sahifada shu manzil |
+| 6 | www.iana.org oxirgi yangilangan sana, Mar-2000 | **`17-December-99`** | footer'dagi sana |
+| 7 | wikipedia.com maqolalar soni, 09-Feb-2003 | **`104155`** | "working on 104155 ..." |
+
+> Q4'dagi `0rganizer` — arxivlangan 1999-yilgi PayPal sahifasida **aynan shunday**
+> (raqam `0` bilan) yozilgan, ya'ni javobda ham `0` bo'lishi kerak.
+
+Tekshirish: `bash solutions/web_archive_lookup.sh` (Wayback `id_` raw snapshotlarni olib,
+javoblarni ajratib chiqaradi). Natija:
+```
+Q1 labs 08-Aug-2018      : 74
+Q2 members 10-Jun-2017   : 3054 members
+Q3 facebook.com Mar-2002 : http://site.aboutface.com/
+Q4 paypal.com Oct-1999   : beam money to anyone with a Palm 0rganizer.
+Q5 google.com Nov-1998   : http://google.stanford.edu/
+Q6 iana.org Mar-2000     : 17-December-99
+Q7 wikipedia 09-Feb-2003 : 104155
+```
+
+---
+
 ## Target 9 — Spidering / web crawling (HTB Academy "Information Gathering - Web Edition")
+
 
 **Savol:** After spidering inlanefreight.com, identify the location where future reports
 will be stored.
