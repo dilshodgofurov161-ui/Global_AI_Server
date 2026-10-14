@@ -41,3 +41,11 @@ Endpoint identified: /czcmdcvt
   curl http://154.57.164.69:32117/czcmdcvt
   -> {"flag":"h1dd3n_r357"}
 ANSWER: h1dd3n_r357
+
+---
+# Web Fuzzing Skills Assessment (target 154.57.164.75:43303)
+/admin/panel.php?accessID=getaccess -> hints fuzzing_fun.htb vhost
+vhost hidden.fuzzing_fun.htb -> /godeep/stoneedge/bbclone/typo3/index.php
+  curl -H "Host: hidden.fuzzing_fun.htb" http://154.57.164.75:43303/godeep/stoneedge/bbclone/typo3/index.php
+  -> HTB{w3b_fuzz1ng_sk1lls}
+ANSWER: HTB{w3b_fuzz1ng_sk1lls}
