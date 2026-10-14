@@ -95,3 +95,10 @@ ANSWER: HTB{570r3d_f0r_3v3ry0n3_70_533}
 # XSS module (target 154.57.164.81:44289)
 GET / -> Set-Cookie: cookie=HTB{r3fl3c73d_b4ck_2_m3}
 ANSWER: HTB{r3fl3c73d_b4ck_2_m3}
+
+---
+# XSS module (target 154.57.164.76:43131) - cookie set via JS
+Inline script: eval(atob("ZG9jdW1lbnQuY29va2llID0gYXRvYignU0ZSQ2UzQjFjak5sZVY5amJERXpiamRmTlRGa00zMD0nKTs="))
+-> document.cookie = atob('SFRCe3B1cjNleV9jbDEzbjdfNTFkM30=')
+decoded cookie value: HTB{pur3ey_cl13n7_51d3}
+ANSWER: HTB{pur3ey_cl13n7_51d3}
