@@ -54,3 +54,9 @@ ANSWER: HTB{w3b_fuzz1ng_sk1lls}
 # JavaScript Deobfuscation (target 154.57.164.78:38110)
 curl http://154.57.164.78:38110/ -> HTML source comment: <!-- HTB{4lw4y5_r34d_7h3_50urc3} -->
 ANSWER: HTB{4lw4y5_r34d_7h3_50urc3}
+
+---
+# JS Deobfuscation (target 154.57.164.78:38110) - secret.js
+Packer-decoded:
+function generateSerial(){var flag="HTB{1_4m_7h3_53r14l_g3n3r470r!}";var xhr=new XMLHttpRequest();var url="/serial.php";xhr.open("POST",url,true);xhr.send(null)}
+ANSWER: HTB{1_4m_7h3_53r14l_g3n3r470r!}
