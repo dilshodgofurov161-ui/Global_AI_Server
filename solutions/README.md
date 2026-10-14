@@ -1,6 +1,30 @@
 # CTF yechimlari (targetlar)
 
+## Target 13 — Recursive fuzzing (HTB Academy "Web Fuzzing")
+
+Target: `http://154.57.164.76:37377/recursive_fuzz/` (lighttpd, 404 = 158 bayt).
+
+| Savol | Javob |
+|-------|-------|
+| Rekursiv fuzzing natijasida topilgan flag | **`HTB{d33p3r_d1rector1es_ar3_c00l}`** |
+
+Rekursiv fuzzing (ffuf `-recursion` / `raft-small-directories`) quyidagi zanjirni ochadi:
+
+```
+/recursive_fuzz/level1/                                -> "This is Recursive Fuzz Level 1"
+/recursive_fuzz/level1/level2/                         -> "This is Recursive Fuzz Level 2"
+/recursive_fuzz/level1/level2/level3/                  -> "This is Recursive Fuzz Level 3"
+/recursive_fuzz/level1/level2/level3/threatcon_level2/ -> HTB{d33p3r_d1rector1es_ar3_c00l}
+```
+
+(Oxirgi papkaning `index.html` i: `This is Recursive Fuzz Level 4 - HTB{d33p3r_d1rector1es_ar3_c00l}`.)
+
+Tekshirish: `bash solutions/recursive_fuzz.sh`
+
+---
+
 ## Target 12 — Web Fuzzing skills assessment (HTB Academy "Web Fuzzing")
+
 
 Target: `http://154.57.164.78:36617/webfuzzing_hidden_path/` (lighttpd/1.4.76, 404 = 158 bayt).
 
