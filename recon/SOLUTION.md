@@ -60,3 +60,9 @@ ANSWER: HTB{4lw4y5_r34d_7h3_50urc3}
 Packer-decoded:
 function generateSerial(){var flag="HTB{1_4m_7h3_53r14l_g3n3r470r!}";var xhr=new XMLHttpRequest();var url="/serial.php";xhr.open("POST",url,true);xhr.send(null)}
 ANSWER: HTB{1_4m_7h3_53r14l_g3n3r470r!}
+
+---
+# JS Deobfuscation (target 154.57.164.78:38110) - POST /serial.php
+curl -X POST http://154.57.164.78:38110/serial.php -> N2gxNV8xNV9hX3MzY3IzN19tMzU1NGcz
+base64 -d -> 7h15_15_a_s3cr37_m3554g3
+ANSWER: 7h15_15_a_s3cr37_m3554g3
