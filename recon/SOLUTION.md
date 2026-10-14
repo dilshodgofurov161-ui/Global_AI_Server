@@ -84,3 +84,9 @@ Q2 (run the JS -> console output): HTB{j4v45cr1p7_3num3r4710n_15_k3y}
 Q3 (deobfuscate -> flag variable): HTB{n3v3r_run_0bfu5c473d_c0d3!}
 Q4 (POST /keys.php -> secret key): 4150495f70336e5f37333537316e365f31355f66756e
 Q5 (decode hex -> API_p3n_73571n6_15_fun; POST key=...): HTB{r34dy_70_h4ck_my_w4y_1n_2_HTB}
+
+---
+# XSS module (target 154.57.164.74:40229)
+GET / -> Set-Cookie: cookie=HTB{570r3d_f0r_3v3ry0n3_70_533}
+(XSS payload alert(document.cookie) would show this cookie value)
+ANSWER: HTB{570r3d_f0r_3v3ry0n3_70_533}
