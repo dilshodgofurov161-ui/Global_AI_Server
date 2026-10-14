@@ -34,3 +34,10 @@ File:       /ur-hiddenmember/backup.tar.gz
   # Content-Length: 210
 
 ### ANSWER: Content-Length: 210
+
+---
+# Question 1 (target 154.57.164.69:32117) - API Fuzzing
+Endpoint identified: /czcmdcvt
+  curl http://154.57.164.69:32117/czcmdcvt
+  -> {"flag":"h1dd3n_r357"}
+ANSWER: h1dd3n_r357
