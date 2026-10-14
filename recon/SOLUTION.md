@@ -102,3 +102,5 @@ Inline script: eval(atob("ZG9jdW1lbnQuY29va2llID0gYXRvYignU0ZSQ2UzQjFjak5sZVY5am
 -> document.cookie = atob('SFRCe3B1cjNleV9jbDEzbjdfNTFkM30=')
 decoded cookie value: HTB{pur3ey_cl13n7_51d3}
 ANSWER: HTB{pur3ey_cl13n7_51d3}
+
+# CORRECTION: value = HTB{pur3ly_cl13n7_51d3} ("purely client side")
