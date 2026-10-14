@@ -70,3 +70,9 @@ ANSWER: 7h15_15_a_s3cr37_m3554g3
 # CORRECTION: Question asks for the RAW response, not the decoded value.
 # Expected answer: N2gxNV8xNV9hX3MzY3IzN19tMzU1NGcz
 # (Decoded 7h15_15_a_s3cr37_m3554g3 is used as input for the NEXT question.)
+
+---
+# JS Deobfuscation - serial.php with decoded output
+curl -X POST http://154.57.164.78:38110/serial.php -d "serial=7h15_15_a_s3cr37_m3554g3"
+-> HTB{ju57_4n07h3r_r4nd0m_53r14l}
+ANSWER: HTB{ju57_4n07h3r_r4nd0m_53r14l}
