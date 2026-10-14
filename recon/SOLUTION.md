@@ -76,3 +76,11 @@ ANSWER: 7h15_15_a_s3cr37_m3554g3
 curl -X POST http://154.57.164.78:38110/serial.php -d "serial=7h15_15_a_s3cr37_m3554g3"
 -> HTB{ju57_4n07h3r_r4nd0m_53r14l}
 ANSWER: HTB{ju57_4n07h3r_r4nd0m_53r14l}
+
+---
+# JavaScript Deobfuscation - SKILL ASSESSMENT (target 154.57.164.79:32623)
+Q1 (JS file name): api.min.js
+Q2 (run the JS -> console output): HTB{j4v45cr1p7_3num3r4710n_15_k3y}
+Q3 (deobfuscate -> flag variable): HTB{n3v3r_run_0bfu5c473d_c0d3!}
+Q4 (POST /keys.php -> secret key): 4150495f70336e5f37333537316e365f31355f66756e
+Q5 (decode hex -> API_p3n_73571n6_15_fun; POST key=...): HTB{r34dy_70_h4ck_my_w4y_1n_2_HTB}
