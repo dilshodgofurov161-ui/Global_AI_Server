@@ -1,6 +1,34 @@
 # CTF yechimlari (targetlar)
 
+## Target 15 — GoBuster vhost & subdomain fuzzing (HTB Academy "Web Fuzzing")
+
+Target: `http://154.57.164.65:35361` (vHost zonasi `inlanefreight.htb`, default vhost = 404/153B).
+
+| Savol | Javob |
+|-------|-------|
+| `common.txt` bilan vhost fuzz — `web-` prefiksli vhost | **`web-beans.inlanefreight.htb`** |
+| `subdomains-top1million-5000.txt` bilan inlanefreight.com subdomain fuzz — `su` prefiksli | **`support.inlanefreight.com`** |
+
+```bash
+# Q1: vhost fuzzing (Host sarlavhasi)
+gobuster vhost -u http://154.57.164.65:35361 -w common.txt --append-domain
+#   200 108 web-beans        (title: "web-beans")
+
+# Q2: DNS subdomain fuzzing
+gobuster dns -d inlanefreight.com -w subdomains-top1million-5000.txt -t 50
+#   Found: support.inlanefreight.com
+```
+
+Tekshirish: `python3 solutions/gobuster_vhost_subdomain.py` →
+```
+web-beans.inlanefreight.htb  (200, 108 bytes)
+support.inlanefreight.com
+```
+
+---
+
 ## Target 14 — GET/POST parameter fuzzing (HTB Academy "Web Fuzzing")
+
 
 Target: `http://154.57.164.71:40811` (lighttpd + PHP 8.3.9; 404 = 158 bayt).
 
