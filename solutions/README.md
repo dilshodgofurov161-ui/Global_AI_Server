@@ -1,5 +1,35 @@
 # CTF yechimlari (targetlar)
 
+## Target 3 — WHOIS (HTB Academy "Information Gathering - Web Edition")
+
+| Savol | Javob |
+|-------|-------|
+| Question 1 — paypal.com registrar IANA ID | `292` |
+| Question 2 — tesla.com admin email contact | `admin@dnstinations.com` |
+
+**Q1.** `whois paypal.com` (registr: MarkMonitor Inc.) chiqishida:
+```
+Registrar: MarkMonitor Inc.
+Registrar IANA ID: 292
+```
+→ **292**
+
+**Q2.** `.com` registri (whois.verisign-grs.com) faqat "thin" yozuv qaytaradi, shuning uchun
+registrar serveriga (`whois.markmonitor.com`) ham murojaat qilinadi:
+```
+Registrant Name: Domain Administrator
+Registrant Organization: DNStination Inc.
+Registrant Email: admin@dnstinations.com
+Tech Email: admin@dnstinations.com
+```
+→ **admin@dnstinations.com** (yozuvdagi yagona ko'rinadigan kontakt emaili; MarkMonitor
+bugungi kunda ba'zi maydonlarni yashirsa ham, Registrant/Tech email ochiq qolgan).
+
+Tekshirish: `python3 solutions/whois_lookup.py paypal.com tesla.com`
+(port 43 orqali raw WHOIS: registr → registrar server zanjiri).
+
+---
+
 ## Target 2 — `154.57.164.81:38220` (ZAP Scanner mashqi)
 
 | Savol | Javob |
