@@ -1,6 +1,28 @@
 # CTF yechimlari (targetlar)
 
+## Target 12 — Web Fuzzing skills assessment (HTB Academy "Web Fuzzing")
+
+Target: `http://154.57.164.78:36617/webfuzzing_hidden_path/` (lighttpd/1.4.76, 404 = 158 bayt).
+
+| Savol | Javob |
+|-------|-------|
+| Folder/file fuzzing natijasida topilgan flag | **`HTB{w3b_f1l3_fuzz1ng_fl4g}`** |
+
+Zanjir:
+1. `webfuzzing_hidden_path/` → 403; `raft-small-directories.txt` bilan fuzz qilganda
+   **`/flag`** → `301` (papka).
+2. `flag/` ichida fayl fuzz qilganda **`flag.html`** → `200`:
+   ```
+   <html><head><title>Index page</title></head><body><h1>HTB{w3b_f1l3_fuzz1ng_fl4g}</h1>...
+   ```
+   (`flag/flag.txt`, `flag.php`, `flag.json` kabilar 404.)
+
+Tekshirish: `bash solutions/webfuzzing_hidden_path.sh`
+
+---
+
 ## Target 11 — Skills Assessment (HTB Academy "Information Gathering - Web Edition")
+
 
 Target: `http://154.57.164.81:36251`, vHost `inlanefreight.htb`. Barchasi jonli tekshirildi.
 
