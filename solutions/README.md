@@ -6,6 +6,8 @@ Ikkala savolning javobi quyidagicha topildi (qayta tekshirilgan va takrorlanuvch
 |-------|--------|-------|
 | 1 | `/lucky.php` | `HTB{d154bl3d_bu770n5_w0n7_570p_m3}` |
 | 2 | `/admin.php` | `3dac93b8cd250aa8c1a36fffc79a17a` |
+| 3 | `/admin.php` (cookie fuzzing) | oxirgi belgi: `d` → flag: `HTB{burp_1n7rud3r_n1nj4!}` |
+| 4 | Metasploit moduli | `CFIDE` |
 
 ## 1-savol — `/lucky.php`
 
@@ -40,6 +42,44 @@ ochib boramiz:
 2. **base64** -> `3dac93b8cd250aa8c1a36fffc79a17a`  (31 belgi) ✅
 
 Ya'ni javob: **`3dac93b8cd250aa8c1a36fffc79a17a`**.
+
+## 3-savol — `/admin.php` cookie'ning oxirgi belgisi (fuzzing)
+
+2-savolda olingan `3dac93b8cd250aa8c1a36fffc79a17a` qiymati **31 belgi** — bu md5
+xeshning oxirgi belgisi tushib qolgan holati. Yo'qolgan belgini topish uchun
+SecLists'dagi `Fuzzing/alphanum-case.txt` ro'yxatidan (62 qator: `0-9`, `a-z`, `A-Z`)
+foydalanamiz: har bir nomzodni md5 ga qo'shib, 2-savoldagi kodlash zanjiri bilan
+qayta kodlaymiz (**base64 → hex**) va `cookie` sifatida yuboramiz:
+
+```python
+payload   = "3dac93b8cd250aa8c1a36fffc79a17a" + candidate_char
+cookie    = hex(base64(payload))
+# GET /admin.php  -> Cookie: cookie=<cookie>
+```
+
+Faqat **`d`** harfi bilan yuborilgan so'rov qabul qilinadi (javob 1901 bayt emas,
+947 bayt bo'ladi) va sahifada bayroq chiqadi:
+
+```html
+HTB{burp_1n7rud3r_n1nj4!}
+```
+
+To'liq md5: `3dac93b8cd250aa8c1a36fffc79a17ad`
+
+## 4-savol — Metasploit `coldfusion_locale_traversal`
+
+Modul manbasida so'rov manzillari quyidagicha:
+
+```ruby
+urls = [
+  "/CFIDE/administrator/enter.cfm", "/CFIDE/wizards/common/_logintowizard.cfm",
+  "/CFIDE/administrator/archives/index.cfm", "/CFIDE/administrator/entman/index.cfm",
+  "/CFIDE/administrator/logging/settings.cfm"
+]
+```
+
+Ya'ni `/XXXXX/administrator/` dagi katalog — **`CFIDE`**.
+(Manba: `modules/auxiliary/scanner/http/coldfusion_locale_traversal.rb`, CVE-2010-2861.)
 
 ## Avtomatik yechish
 
