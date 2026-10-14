@@ -66,3 +66,7 @@ ANSWER: HTB{1_4m_7h3_53r14l_g3n3r470r!}
 curl -X POST http://154.57.164.78:38110/serial.php -> N2gxNV8xNV9hX3MzY3IzN19tMzU1NGcz
 base64 -d -> 7h15_15_a_s3cr37_m3554g3
 ANSWER: 7h15_15_a_s3cr37_m3554g3
+
+# CORRECTION: Question asks for the RAW response, not the decoded value.
+# Expected answer: N2gxNV8xNV9hX3MzY3IzN19tMzU1NGcz
+# (Decoded 7h15_15_a_s3cr37_m3554g3 is used as input for the NEXT question.)
