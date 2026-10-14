@@ -1,6 +1,26 @@
 # CTF yechimlari (targetlar)
 
+## Target 9 — Spidering / web crawling (HTB Academy "Information Gathering - Web Edition")
+
+**Savol:** After spidering inlanefreight.com, identify the location where future reports
+will be stored.
+
+| Savol | Javob |
+|-------|-------|
+| Kelajakdagi hisobotlar saqlanadigan joy | **`inlanefreight-comp133.s3.amazonaws.htb`** |
+
+Saytning `news` sahifasida HTML izohi qolgan (spider/crawler shuni topadi):
+```html
+<!-- TO-DO: change the location of future reports to inlanefreight-comp133.s3.amazonaws.htb -->
+```
+
+Tekshirildi jonli saytda: `bash solutions/spider_reports_location.sh`
+→ `/index.php/news/  TO-DO: change the location of future reports to inlanefreight-comp133.s3.amazonaws.htb -->`
+
+---
+
 ## Target 8 — Web fingerprinting (HTB Academy "Information Gathering - Web Edition")
+
 
 Target: `10.129.235.92` (ACADEMY-ATCKKAPS-APP01), vHosts `app.inlanefreight.local`,
 `dev.inlanefreight.local`.
