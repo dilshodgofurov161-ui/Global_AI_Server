@@ -1,0 +1,5 @@
+scans/
+loot/
+*.nmap
+*.xml
+*.gnmap
