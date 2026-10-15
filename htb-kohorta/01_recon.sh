@@ -33,7 +33,10 @@ if ip link show tun0 >/dev/null 2>&1; then
     VPNIP=$(ip -4 addr show tun0 | grep -oP 'inet \K[\d.]+' || true)
     ok "tun0 IP = $VPNIP   (LHOST=$VPNIP)"
 else
-    warn "tun0 YO'Q — HTB VPN ulanmagan! (avval openvpn --config ...ovpn)"
+    warn "WSL'da tun0 yo'q — bu har doim ham muammo emas:"
+    warn "  * Windows'da OpenVPN ulangan bo'lsa -> NORMAL (WSL NAT orqali o'tadi)"
+    warn "  * Aks holda kerak: sudo openvpn --config ~/vpn/machines_us-3.ovpn"
+    warn "  (pastdagi 'Target tirikmi?' testi hal qiluvchi)"
 fi
 
 # ---------- 1. Host tirikmi ----------

@@ -28,20 +28,34 @@ machine'da ham bir xil muammo.
 
 ## 3. Skriptlar
 
-| Fayl | Vazifa |
-|---|---|
-| `01_recon.sh` | /etc/hosts, tun0 MTU, port sweep, servis scan, OS detect |
-| `02_web_enum.sh` | web texnologiya, standart fayllar, dir brute, vhost |
-| `03_privesc.sh` | target ichida: sudo/SUID/capabilities/cron/parollar |
+| Fayl | Vazifa | Sinov |
+|---|---|---|
+| `01_recon.sh` | /etc/hosts, tun0 MTU, port sweep, servis scan, OS detect | ✅ real |
+| `02_web_enum.sh` | texnologiya, standart fayllar, dir brute, vhost | ✅ real |
+| `03_privesc.sh` | target ichida: sudo/SUID/capabilities/cron/parollar | ✅ real (exit 0) |
+| `04_vpn_check.sh` | VPN/target ulanish diagnostikasi (Windows konflikt aniqlash) | ✅ real |
+| `05_vhost_enum.sh` | **vhost/subdomain** enum (wildcard cert uchun MUHIM) | ✅ mock (3/3 topdi) |
+| `06_dir_brute.sh` | papka/fayl brute — sof curl fallback | ✅ mock (3/3 topdi) |
+| `mock_vhosts.py` | 05/06 ni sinash uchun soxta multi-vhost server | — |
 
 ```bash
-sudo ./01_recon.sh 10.129.244.174
-./02_web_enum.sh kohorta.htb          # yoki kohorta.htb 8080
-# shell olgach TARGETDA:
-bash 03_privesc.sh
+echo "10.129.244.174 cohort.htb cohort" | sudo tee -a /etc/hosts
+sudo bash 01_recon.sh 10.129.244.174
+bash 05_vhost_enum.sh                          # MUHIM: wildcard cert
+bash 02_web_enum.sh cohort.htb                 # yoki BASE=https://portal.cohort.htb
+sudo bash 03_privesc.sh                        # target ICHIDA
 ```
 
-Barcha skriptlar sinovdan o'tgan (`bash -n` + real ishga tushirish).
+### Topilgan recon natijasi (2026-10-15)
+
+| Port | Servis |
+|---|---|
+| 22 | OpenSSH 9.6p1 Ubuntu 3ubuntu13.18 |
+| 80 | nginx 1.24.0 → redirect **`https://cohort.htb/`** |
+| 443 | nginx 1.24.0, cert `CN=cohort.htb`, ORG **Cohort Analytics**, SAN: `cohort.htb`, **`*.cohort.htb`** |
+
+> ⚠️ Mashina nomi **Kohorta**, lekin domen **`cohort.htb`**.
+> **Wildcard SAN** (`*.cohort.htb`) → **subdomain'lar bor** → `05_vhost_enum.sh` majburiy.
 
 ---
 

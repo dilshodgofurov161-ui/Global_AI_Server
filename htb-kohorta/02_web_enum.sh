@@ -8,9 +8,12 @@
 # ============================================================
 set -uo pipefail
 
-HOST="${1:-kohorta.htb}"
-PORT="${2:-80}"
-if [ "$PORT" = "80" ]; then BASE="http://$HOST"; else BASE="http://$HOST:$PORT"; fi
+HOST="${1:-cohort.htb}"
+PORT="${2:-443}"
+# BASE ni env orqali bekor qilish mumkin:  BASE=https://cohort.htb bash 02_web_enum.sh
+if [ -n "${BASE:-}" ]; then :; elif [ "$PORT" = "443" ]; then BASE="https://$HOST"
+elif [ "$PORT" = "80" ]; then BASE="http://$HOST"; else BASE="http://$HOST:$PORT"; fi
+CURL="curl -sk"          # -k: self-signed cert (HTB boxlar uchun)
 OUT="scans/web"
 mkdir -p "$OUT"
 
@@ -36,13 +39,13 @@ say "Target: $BASE"
 # ---------- 1. Texnologiya ----------
 say "1. Texnologiya aniqlash"
 has whatweb && whatweb -a 3 "$BASE" | tee "$OUT/whatweb.txt"
-curl -sSI -m 10 "$BASE" | tee "$OUT/headers.txt"
+$CURL -sSI -m 10 "$BASE" | tee "$OUT/headers.txt"
 
 # ---------- 2. Standart fayllar ----------
 say "2. Standart fayllar"
 for p in robots.txt sitemap.xml .git/HEAD .env backup.zip backup.tar.gz \
          config.php info.php phpinfo.php server-status; do
-    code=$(curl -sS -m 8 -o /dev/null -w '%{http_code}' "$BASE/$p")
+    code=$($CURL -sS -m 8 -o /dev/null -w '%{http_code}' "$BASE/$p")
     [ "$code" != "404" ] && [ "$code" != "000" ] && echo "  [$code] $BASE/$p"
 done | tee "$OUT/default_files.txt"
 
@@ -50,25 +53,24 @@ done | tee "$OUT/default_files.txt"
 if [ -n "$WL" ]; then
     say "3. Papka/fayl qidirish"
     if has feroxbuster; then
-        feroxbuster -u "$BASE" -w "$WL" -t 30 -d 2 --silent -o "$OUT/ferox.txt"
+        feroxbuster -u "$BASE" -w "$WL" -t 30 -d 2 -k --silent -o "$OUT/ferox.txt"
     elif has gobuster; then
-        # -x php,html,txt: Easy boxlarda ko'p uchraydi
-        gobuster dir -u "$BASE" -w "$WL" -t 30 -x php,html,txt,js,zip \
+        gobuster dir -u "$BASE" -w "$WL" -t 30 -k -x php,html,txt,js,zip \
                  -o "$OUT/gobuster.txt" -q
     elif has ffuf; then
-        ffuf -u "$BASE/FUZZ" -w "$WL" -mc 200,204,301,302,307,401,403 \
+        ffuf -u "$BASE/FUZZ" -w "$WL" -k -mc 200,204,301,302,307,401,403 \
              -t 30 -o "$OUT/ffuf.json" -of json
     else
         warn "feroxbuster/gobuster/ffuf yo'q — o'rnating: sudo apt install feroxbuster"
+        warn "  yoki:  bash 06_dir_brute.sh $HOST"
     fi
 fi
 
-# ---------- 4. Vhost ----------
-if [ -n "$WL" ] && has ffuf; then
-    say "4. Vhost fuzzing"
-    ffuf -u "http://$HOST" -H "Host: FUZZ.$HOST" -w "$WL" \
-         -mc 200,301,302,401,403 -fs 0 -t 40 -o "$OUT/vhost.json" -of json 2>/dev/null
-fi
+# ---------- 4. Vhost (wildcard cert bo'lsa MUHIM) ----------
+say "4. Vhost enumeration"
+warn "05_vhost_enum.sh ishlatiladi (ffuf yoki curl fallback)"
+[ -f 05_vhost_enum.sh ] && bash 05_vhost_enum.sh "$HOST" "$HOST" >/dev/null 2>&1
+[ -s scans/vhost/hits.txt ] && { ok "topilgan vhost'lar:"; cat scans/vhost/hits.txt | sed 's/^/    /'; }
 
 # ---------- 5. Xulosa ----------
 say "XULOSA"
