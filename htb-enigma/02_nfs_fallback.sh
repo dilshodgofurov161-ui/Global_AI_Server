@@ -34,22 +34,22 @@ fi
 if command -v nfs-ls >/dev/null; then
   echo
   echo "[*] nfs-ls -D (list exports)"
-  nfs-ls -D "nfs://${IP}" || true
+  sudo nfs-ls -D "nfs://${IP}" || true
 
   echo
-  echo "[*] nfs-ls ${URL}"
-  nfs-ls "${URL}" || true
+  echo "[*] nfs-ls ${URL}   (as root - reserved source port required)"
+  sudo nfs-ls "${URL}" || true
 
   echo
   echo "[*] nfs-cat -> ${OUT}"
-  if nfs-cat "${URL}/${RFILE}" > "${OUT}" 2>/dev/null && [ -s "${OUT}" ]; then
+  if sudo nfs-cat "${URL}/${RFILE}" > "${OUT}" 2>/dev/null && [ -s "${OUT}" ]; then
     echo "[+] got ${OUT} ($(stat -c%s "${OUT}") bytes)"
     echo "--- PDF TEXT ---"
     pdftotext "${OUT}" - 2>/dev/null || strings "${OUT}" | head -60
     echo "----------------"
     exit 0
   fi
-  echo "[-] libnfs failed, trying mount variants..."
+  echo "[-] libnfs (as root) failed, trying mount variants..."
 fi
 
 # ------------------------------------------------------------ 2) mount tries
@@ -78,8 +78,17 @@ try_mount "vers=4,resvport"
 
 echo
 echo "!! all attempts failed."
-echo "   The server is likely rejecting our source port (privileged-port / WSL2 issue)."
-echo "   Workarounds:"
-echo "     * run the same commands from a real Kali VM (VirtualBox/VMware), not WSL"
-echo "     * verbose debug:  sudo mount -t nfs -o vers=3,resvport ${IP}:${RPATH} ${MNT} -vvvv"
+echo "   Diagnosis: mountd refuses our MNT request (MNT3ERR_ACCES). The export"
+echo "   uses 'secure', i.e. it only accepts calls from a privileged source"
+echo "   port (<1024). WSL2's NFS client cannot satisfy that."
+echo
+echo "   Next steps, in order:"
+echo "     1) Windows NFS client (works from WSL):"
+echo "        Win+R -> optionalfeatures -> enable 'Services for NFS' -> 'Client for NFS'"
+echo "        then in PowerShell(Admin):"
+echo "          mount -o anon \\\\${IP}\\\\srv\\\\nfs\\\\onboarding Z:"
+echo "        and read Z:\\${RFILE} (copy it into WSL as /mnt/z/${RFILE})"
+echo "     2) verbose debug:"
+echo "          sudo mount -t nfs -o vers=3,resvport ${IP}:${RPATH} ${MNT} -vvvv"
+echo "     3) run everything from a real Kali VM (VirtualBox/VMware), not WSL"
 exit 1

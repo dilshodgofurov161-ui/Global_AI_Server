@@ -83,6 +83,23 @@ pdftotext /mnt/enigma/New_Employee_Access.pdf -
 > Kali VM (VirtualBox/VMware) instead of WSL — WSL2's NFS client is the usual
 > culprit for `illegal port` refusals.
 
+> **If every attempt still says *access denied* (e.g. `MNT3ERR_ACCES`), the
+> export uses `secure` and only accepts calls from a privileged source port
+> (<1024) — WSL2's NFS client cannot do that.** In that case:
+> 1. **Use the Windows NFS client** (works even though Linux side is WSL):
+>    `Win+R` → `optionalfeatures` → enable *Services for NFS* → *Client for NFS*,
+>    then in PowerShell (Admin):
+>    ```powershell
+>    mount -o anon \\10.129.4.140\srv\nfs\onboarding Z:
+>    ```
+>    Read `Z:\New_Employee_Access.pdf` from Windows, or `cp /mnt/z/New_Employee_Access.pdf .`
+>    from WSL.
+> 2. Run everything from a real Kali VM (VirtualBox/VMware) instead of WSL.
+>
+> Note: `mount.nfs`/`nfs-cat` must run with **`sudo`** — a reserved source port
+> can only be bound by root. Running them as a normal user always yields
+> `Permission denied`.
+
 ### 3. Mail pivot
 ```bash
 openssl s_client -connect 10.129.4.140:993 -quiet
