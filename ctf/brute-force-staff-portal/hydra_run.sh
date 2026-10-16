@@ -12,7 +12,7 @@
 # Prereqs:  sudo apt-get install -y hydra wordlists   # gives /usr/share/wordlists/rockyou.txt
 set -u
 
-TARGET="${TARGET:-10.15.0.238}"
+TARGET="${TARGET:-10.15.1.54}"
 PORT="${PORT:-9004}"
 USER="${USER_NAME:-admin}"
 WORDLIST="${WORDLIST:-/usr/share/wordlists/rockyou.txt}"

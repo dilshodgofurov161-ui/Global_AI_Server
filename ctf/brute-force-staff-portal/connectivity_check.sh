@@ -8,7 +8,7 @@
 #         TARGET=10.15.1.54 PORT=9004 ./connectivity_check.sh
 set -u
 
-TARGET="${TARGET:-10.15.0.238}"
+TARGET="${TARGET:-10.15.1.54}"
 PORT="${PORT:-9004}"
 
 echo "== 1. VPN tunnel interface (tun0/tun1) =="

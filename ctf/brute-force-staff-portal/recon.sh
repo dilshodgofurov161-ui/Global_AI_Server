@@ -3,7 +3,7 @@
 # Run from a machine on the lab VPN. Discovers the form action, field names
 # and the failure string needed by hydra / brute.py.
 set -u
-TARGET="${TARGET:-10.15.0.238}"
+TARGET="${TARGET:-10.15.1.54}"
 PORT="${PORT:-9004}"
 BASE="http://${TARGET}:${PORT}"
 
