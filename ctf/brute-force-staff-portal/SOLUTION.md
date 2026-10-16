@@ -1,8 +1,9 @@
 # ✅ YECHIM — 04 · Brute Force: Staff Portal
 
-**Status:** HAL QILINDI (parol topildi)
+**Status:** HAL QILINDI ✅
 **Target:** `http://10.15.1.54:9004/`
 **Credentials:** `admin` : `jordan23`
+**FLAG:** `HTB{form_force_562c6385d5e2b9ee}`
 
 ---
 

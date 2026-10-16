@@ -1,9 +1,10 @@
 # 🎯 05 · Brute Force: Basic Auth — yechim
 
-**Status:** HAL QILINDI (credentials topildi)
+**Status:** HAL QILINDI ✅
 **Target:** `http://10.15.1.54:9005/`  (tavsifda `10.15.0.238:9005`)
 **Himoya:** HTTP Basic Auth · **Username:** `operator` · **Parol:** `chocolate`
-**Qoida:** faqat 9005 port. Flag: `HTB{...}`.
+**Qoida:** faqat 9005 port.
+**FLAG:** `HTB{basic_crack_121188c59ab71e3b}`
 
 ## ✅ Topilgan credentials
 ```
