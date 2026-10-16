@@ -1,7 +1,10 @@
 # 🎯 10 · Brute Force: Username Enumeration — yechim
 
+**Status:** HAL QILINDI ✅
 **Target:** `http://10.15.1.54:9010/`  (tavsifda `10.15.0.238:9010`)
-**Qoida:** faqat 9010 port. Flag: `HTB{...}`.
+**Credentials:** `s.rivera` : `Mochi2019!`
+**FLAG:** `HTB{user_enum_378bc2a7e3861b7b}`
+**Qoida:** faqat 9010 port.
 
 ## 🔎 Tasdiqlangan recon (lab javobi)
 Login **username mavjudligini oshkor qiladi**:
