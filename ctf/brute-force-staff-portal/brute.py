@@ -192,7 +192,11 @@ class Brute(object):
             hit = (a.fail not in body) if a.fail else False
 
         if hit and (a.success or a.fail):
-            if a.success and a.success in body:
+            # Prefer showing the flag if the success page contains one.
+            fm = re.search(r"HTB\{[^}]*\}", body)
+            if fm:
+                snippet = fm.group(0)
+            elif a.success and a.success in body:
                 i = body.find(a.success)
                 snippet = body[i:i + 120].replace("\n", " ").strip()
             else:
