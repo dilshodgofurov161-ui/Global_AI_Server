@@ -2,9 +2,22 @@
 
 **Target:** `http://10.15.1.54:9010/`  (tavsifda `10.15.0.238:9010`)
 **Qoida:** faqat 9010 port. Flag: `HTB{...}`.
-**Mohiyat:** login **username mavjudligini** oshkor qiladi → valid akkauntni top,
-`/team` OSINT'dan **cupp-uslubidagi maqsadli wordlist** yasa, **o'sha bitta**
-akkauntni crack qil. `admin` qo'ldan uzoqda.
+
+## 🔎 Tasdiqlangan recon (lab javobi)
+Login **username mavjudligini oshkor qiladi**:
+- mavjud akkaunt, xato parol → `Incorrect password for that account.`
+- yo'q akkaunt → `No account exists with username <code>...</code>.`
+
+`/team` OSINT:
+| Kim | Email (username) | OSINT |
+|-----|------------------|-------|
+| **Sofia Rivera** | `s.rivera@acme.io` | corgi **Mochi**, **2019**-da asrab olgan, **climbing** |
+| Mark Doyle | `m.doyle@acme.io` | DevOps Lead |
+| Admin Team | `admin@acme.io` | **out of reach** |
+
+> Username formati: **birinchi-harf.familiya** → `s.rivera`, `m.doyle`.
+
+**Crack uchun fail string:** `Incorrect password`.
 
 ---
 
