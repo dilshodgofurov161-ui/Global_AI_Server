@@ -99,6 +99,26 @@ pdftotext /mnt/enigma/New_Employee_Access.pdf -
 > Note: `mount.nfs`/`nfs-cat` must run with **`sudo`** — a reserved source port
 > can only be bound by root. Running them as a normal user always yields
 > `Permission denied`.
+>
+> **If even `sudo` gives `MNT3ERR_ACCES(13)`:** the WSL2 NAT remaps the source
+> port, so the server never sees a privileged port no matter what you do in the
+> distro. Fixes, best first:
+>
+> 1. **WSL mirrored networking** (Windows 11 22H2+). Create
+>    `C:\Users\<YourName>\.wslconfig`:
+>    ```ini
+>    [wsl2]
+>    networkingMode=mirrored
+>    ```
+>    then in PowerShell: `wsl --shutdown` and reopen the distro. Mirrored mode
+>    gives WSL the host's real network stack (no NAT), so reserved ports work.
+> 2. **Skip mountd — use NFSv4**, which has no MOUNT protocol call at all:
+>    ```bash
+>    sudo nfs-ls  "nfs://10.129.4.140/srv/nfs/onboarding?version=4"
+>    sudo nfs-cat "nfs://10.129.4.140/srv/nfs/onboarding/New_Employee_Access.pdf?version=4" > /tmp/new.pdf
+>    sudo mount -t nfs -o vers=4.2 10.129.4.140:/srv/nfs/onboarding /mnt/enigma -vvvv
+>    ```
+> 3. **Windows NFS client** (see below) or a real Kali VM.
 
 ### 3. Mail pivot
 ```bash
