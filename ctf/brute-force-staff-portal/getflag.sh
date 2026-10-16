@@ -17,7 +17,7 @@ PORT="${PORT:-9004}"
 USER_NAME="${USER_NAME:-admin}"
 WORDLIST="${WORDLIST:-/usr/share/wordlists/rockyou.txt}"
 LOGIN_PATH="${LOGIN_PATH:-}"
-FAIL_STRING="${FAIL_STRING:-Invalid}"
+FAIL_STRING="${FAIL_STRING:-Invalid}"   # sahifada: "Invalid username or password."
 BASE="http://${TARGET}:${PORT}"
 
 echo "[*] target = ${BASE}   user = ${USER_NAME}"
