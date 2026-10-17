@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.pcap
+CVE-2026-34990-CUPS-LPE-PoC/
+cve-2026-44011-poc/
